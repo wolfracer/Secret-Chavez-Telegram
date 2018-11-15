@@ -7,7 +7,7 @@ import time
 from enum import Enum
 from telegram.error import Unauthorized, TelegramError
 
-BOT_USERNAME = "SecretHitlerGame_Bot"
+BOT_USERNAME = "SuperSecretHitlerBot"
 BLAME_RATELIMIT = 69 # seconds
 TESTING = (__name__ == "__main__") # test whenever this file is run directly
 # set TESTING to True to simulate a game locally
