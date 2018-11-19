@@ -328,7 +328,14 @@ class Game(object):
             self.global_message("Player {} left, so this game is self-destructing".format(p))
             self.set_game_state(GameStates.GAME_OVER)
             return
-        self.global_message("Player {} has left".format(p))
+        leave_message = "Player {} has left".format(p)
+        # If we're staging a new game, show updated staging info
+        if self.game_state == GameStates.ACCEPT_PLAYERS:
+            if self.num_players < 5:
+                leave_message += "\nYou need {} more players before you can start.".format(["5️⃣","4️⃣","3️⃣","2️⃣","1️⃣"][self.num_players],"" if self.num_players==4 else "s")
+            else:
+                leave_message += "\nType /startgame to start the game with {} players!".format(self.num_players)
+        self.global_message(leave_message)
 
     def select_chancellor(self, target):
         """
@@ -837,7 +844,13 @@ class Game(object):
                 elif not from_player.join_game(self):
                     return "Error: you've already joined another game! Leave/end that one to play here."
                 self.add_player(from_player)
-                return "Welcome, {}! Make sure to [message me directly](t.me/{}) before the game starts so I can send you secret information.".format(from_player.name, BOT_USERNAME)
+                welcome_message = "Welcome, {}! Make sure to [message me directly](t.me/{}) before the game starts so I can send you secret information.".format(from_player.name, BOT_USERNAME)
+                # Show updated staging info
+                if self.num_players < 5:
+                    welcome_message += "\nYou need {} more players before you can start.".format(["5️⃣","4️⃣","3️⃣","2️⃣","1️⃣"][self.num_players],"" if self.num_players==4 else "s")
+                else:
+                    welcome_message += "\nType /startgame to start the game with {} players!".format(self.num_players)
+                return welcome_message
             elif command == "startgame":
                 if self.num_players < 5:
                     return "Error: only {} players".format(self.num_players)
