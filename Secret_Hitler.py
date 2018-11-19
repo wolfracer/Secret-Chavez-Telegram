@@ -139,6 +139,41 @@ class Game(object):
 
     def reset_blame_ratelimit(self):
         self.last_blame = time.time() - BLAME_RATELIMIT
+
+    def show(self, things_to_show = ["liberal","fascist","anarchy","players","deck_stats","hitler_warning"]):
+        """
+        Builds a textual representation of selected board stats,
+        including:
+        - Victory tracks
+            - liberal                           "liberal"
+            - fascist                           "fascist"
+        - Anarchy tracker                       "anarchy"
+        - Player order                          "players"
+        - Draw/Discard pile information         "deck_stats"
+            - detailed info on policies         "deck_stats_detailed"
+        - HitlerZone information                "hitler_warning"
+        """
+        message = ""
+        to_show, rest = things_to_show[0], things_to_show[1:]
+        if to_show == "liberal":
+            message = "— Liberal Track —\n" + " ".join(["✖️","✖️","✖️","✖️","✖️"][self.liberal:]+["◻️","◻️","◻️","◻️","🕊"][self.liberal-5:])
+        elif to_show == "fascist":
+            message = "— Fascist Track —\n" + " ".join(["✖️","✖️","✖️","✖️","✖️","✖️"][self.fascist:]+["◻️","◻️","◻️","◻️","◻️","☠️"][self.fascist-6:])
+        elif to_show == "anarchy":
+            message = "— Anarchy Track —\n" + " ".join(["✖️","✖️","✖️"][self.anarchy_progress:]+["◻️","◻️","◻️"][self.anarchy_progress-3:])
+        elif to_show == "players":
+            message = "— Presidential Order —\n" + " ➡️ ".join(self.players-self.dead_players) + " 🔁"
+        elif to_show == "deck_stats":
+            message = "There are {} policies left in the draw pile, {} in the discard pile.".format(len(self.deck), len(self.discard))
+        elif to_show == "deck_stats_detailed":
+            message = "There are {} liberal and {} fascist policies in both piles combined.".format(11 - self.fascist, 6 - self.liberal)
+        elif to_show == "hitler_warning":
+            if self.fascist >= 3:
+                message += "‼️ Beware: If Hitler gets elected as Chancellor, the fascists win the game! ‼️"
+        if len(rest)>0:
+            message += "\n" + show(self, rest)
+        return message
+
     def start_game(self):
         """
         Starts a game:
