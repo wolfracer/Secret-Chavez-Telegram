@@ -584,10 +584,7 @@ class Game(object):
         if not on_anarchy and self.game_state == GameStates.LEG_CHANCY: # don't need to wait for other decisison
             self.advance_presidency()
 
-        self.global_message("NEW BOARD STATE\n" \
-            + "{} Fascist\n{} Liberal\n".format(self.fascist, self.liberal) \
-            + "{} in draw pile, {} in discard pile".format(len(self.deck), len(self.discard))
-        )
+        self.global_message(show(self))
 
     def pass_liberal(self):
         """
@@ -901,11 +898,11 @@ class Game(object):
             else:
                 return "Error: game has not started"
         if command == "boardstats":
-            return "{} Fascist / {} Liberal".format(self.fascist, self.liberal)
+            return show(self)
         elif command == "deckstats":
-            return "{} tiles in deck, {} in discard. {} F / {} L in deck/discard (combined)".format(len(self.deck), len(self.discard), 11 - self.fascist, 6 - self.liberal)
+            return show(self, ["deck_stats", "deck_stats_detailed"])
         elif command == "anarchystats":
-            return "Election tracker is at {}/3".format(self.anarchy_progress)
+            return show(self, ["anarchy"])
         elif command == "blame":
             if time.time() - self.last_blame < BLAME_RATELIMIT:
                 from_player.send_message("Hey, slow down!")
