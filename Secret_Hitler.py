@@ -900,11 +900,11 @@ class Game(object):
             else:
                 return "Error: game has not started"
         if command == "boardstats":
-            return show(self)
+            return "{}".format(show(self))
         elif command == "deckstats":
-            return show(self, ["deck_stats", "deck_stats_detailed"])
+            return "{}".format(show(self, ["deck_stats", "deck_stats_detailed"]))
         elif command == "anarchystats":
-            return show(self, ["anarchy"])
+            return "{}".format(show(self, ["anarchy"]))
         elif command == "blame":
             if time.time() - self.last_blame < BLAME_RATELIMIT:
                 from_player.send_message("Hey, slow down!")
