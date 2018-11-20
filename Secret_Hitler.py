@@ -170,6 +170,8 @@ class Game(object):
         elif to_show == "hitler_warning":
             if self.fascist >= 3:
                 message += "‼️ Beware: If Hitler gets elected as Chancellor, the fascists win the game! ‼️"
+        elif len(to_show) > 0:
+            message += "(I don’t know what you mean by “{}”)".format(to_show)
         if len(rest)>0:
             message += "\n" + show(self, rest)
         return message
