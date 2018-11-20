@@ -173,7 +173,7 @@ class Game(object):
         elif len(to_show) > 0:
             message += "(I don’t know what you mean by “{}”)".format(to_show)
         if len(rest)>0:
-            message += "\n" + show(self, rest)
+            message += "\n" + self.show(self, rest)
         return message
 
     def start_game(self):
@@ -586,7 +586,7 @@ class Game(object):
         if not on_anarchy and self.game_state == GameStates.LEG_CHANCY: # don't need to wait for other decisison
             self.advance_presidency()
 
-        self.global_message(string(show(self)))
+        self.global_message(self.show(self))
 
     def pass_liberal(self):
         """
@@ -900,11 +900,11 @@ class Game(object):
             else:
                 return "Error: game has not started"
         if command == "boardstats":
-            return string(show(self))
+            return self.show(self)
         elif command == "deckstats":
-            return string(show(self, ["deck_stats", "deck_stats_detailed"]))
+            return self.show(self, ["deck_stats", "deck_stats_detailed"])
         elif command == "anarchystats":
-            return string(show(self, ["anarchy"]))
+            return self.show(self, ["anarchy"])
         elif command == "blame":
             if time.time() - self.last_blame < BLAME_RATELIMIT:
                 from_player.send_message("Hey, slow down!")
