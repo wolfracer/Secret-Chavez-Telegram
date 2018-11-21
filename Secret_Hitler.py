@@ -17,7 +17,7 @@ if not TESTING:
 
     # unnecessary in TESTING mode
 
-EVERYONE_HITLER = True
+EVERYONE_HITLER = False
 EVERYONE_HITLER_EXPLANATION = "Hi, the game admins set the EVERYONE_HITLER flag, so you are not the only Hitler, so the game will keep going."
 
 class Player(object):
@@ -782,7 +782,6 @@ class Game(object):
         "boardstats", "deckstats", "anarchystats", "blame", "ja", "nein",
         "nominate", "kill", "investigate", "enact", "discard", "whois",
         "spectate", "unspectate", "logs")
-    MARKDOWN_COMMANDS = ("joingame", "blame", "whois", "startgame") # these all use links/tags
     def handle_message(self, from_player, command, args=""):
         """
         Handle the message "/command args" from from_player. Using the game state

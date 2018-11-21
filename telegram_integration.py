@@ -156,10 +156,7 @@ def game_command_handler(bot, update, chat_data, user_data):
         # these errors as they occur
 
         if reply: # reply is None if no response is necessary
-            if command in Secret_Hitler.Game.MARKDOWN_COMMANDS: # these require links/tagging
-                bot.send_message(chat_id=chat_id, text=reply, parse_mode=telegram.ParseMode.MARKDOWN)
-            else:
-                bot.send_message(chat_id=chat_id, text=reply)
+            bot.send_message(chat_id=chat_id, text=reply, parse_mode=telegram.ParseMode.MARKDOWN)
 
     except Secret_Hitler.GameOverException:
         return
