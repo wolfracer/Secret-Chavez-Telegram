@@ -733,6 +733,7 @@ class Game(object):
 
         self.termlimited_players.clear()
         self.anarchy_progress = 0
+        self.advance_presidency()
 
     def end_game(self, winning_party, reason):
         """
