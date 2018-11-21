@@ -249,6 +249,7 @@ if __name__ == "__main__":
     dispatcher.add_handler(CommandHandler('feedback', feedback_handler, pass_args=True))
 
     dispatcher.add_handler(CommandHandler('newgame', newgame_handler, pass_chat_data=True))
+    dispatcher.add_handler(CommandHandler('cancelgame', cancelgame_handler, pass_chat_data=True))
     dispatcher.add_handler(CommandHandler(['leave', 'byebitch'], leave_handler, pass_user_data=True))
 
     dispatcher.add_handler(CommandHandler(Secret_Hitler.Game.ACCEPTED_COMMANDS + tuple(COMMAND_ALIASES.keys()), game_command_handler, pass_chat_data=True, pass_user_data=True))
