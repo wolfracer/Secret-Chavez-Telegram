@@ -140,7 +140,7 @@ class Game(object):
     def reset_blame_ratelimit(self):
         self.last_blame = time.time() - BLAME_RATELIMIT
 
-    def show(self, things_to_show = ["liberal","fascist","anarchy","players","deck_stats","hitler_warning"]):
+    def show(self, things_to_show = ["liberal","fascist","","anarchy","","players","","deck_stats","","hitler_warning"]):
         """
         Builds a textual representation of selected board stats,
         including:
@@ -152,6 +152,7 @@ class Game(object):
         - Draw/Discard pile information         "deck_stats"
             - detailed info on policies         "deck_stats_detailed"
         - HitlerZone information                "hitler_warning"
+        - A blank line                          ""
         """
         message = ""
         to_show, rest = things_to_show[0], things_to_show[1:]
@@ -176,6 +177,8 @@ class Game(object):
         elif to_show == "hitler_warning":
             if self.fascist >= 3:
                 message += "‼️ Beware: If Hitler gets elected as Chancellor, the fascists win the game! ‼️"
+        elif to_show == "":
+            message += "\n"
         elif len(to_show) > 0:
             message += "(I don’t know what you mean by “{}”)".format(to_show)
         if len(rest)>0:
