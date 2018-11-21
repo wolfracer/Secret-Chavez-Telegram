@@ -172,7 +172,7 @@ class Game(object):
         elif to_show == "deck_stats":
             message = "There are {} policies left in the draw pile, {} in the discard pile.".format(len(self.deck), len(self.discard))
         elif to_show == "deck_stats_detailed":
-            message = "There are {} liberal and {} fascist policies in both piles combined.".format(11 - self.fascist, 6 - self.liberal)
+            message = "There are {} liberal and {} fascist policies in both piles combined.".format(6 - self.liberal, 11 - self.fascist)
         elif to_show == "hitler_warning":
             if self.fascist >= 3:
                 message += "‼️ Beware: If Hitler gets elected as Chancellor, the fascists win the game! ‼️"
