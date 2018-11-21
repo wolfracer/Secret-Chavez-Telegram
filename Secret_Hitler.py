@@ -158,7 +158,13 @@ class Game(object):
         if to_show == "liberal":
             message = "— Liberal Track —\n" + " ".join(["✖️","✖️","✖️","✖️","✖️"][:self.liberal]+["◻️","◻️","◻️","◻️","🕊"][self.liberal-5:])
         elif to_show == "fascist":
-            message = "— Fascist Track —\n" + " ".join(["✖️","✖️","✖️","✖️","✖️","✖️"][:self.fascist]+["◻️","◻️","◻️","◻️","◻️","☠️"][self.fascist-6:])
+            fascist_track = ["◻️","◻️","🔮","🗡","🗡","☠️"]
+            if self.num_players > 6:
+                fascist_track[2] = "👔"
+                fascist_track[1] = "🔎"
+            if self.num_players > 8:
+                fascist_track[0] = "🔎"
+            message = "— Fascist Track —\n" + " ".join(["✖️","✖️","✖️","✖️","✖️","✖️"][:self.fascist]+fascist_track[self.fascist-6:])
         elif to_show == "anarchy":
             message = "— Anarchy Track —\n" + " ".join(["✖️","✖️","✖️"][:self.anarchy_progress]+["◻️","◻️","◻️"][self.anarchy_progress-3:])
         elif to_show == "players":
