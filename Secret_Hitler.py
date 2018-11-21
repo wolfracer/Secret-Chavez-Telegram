@@ -168,7 +168,7 @@ class Game(object):
         elif to_show == "anarchy":
             message = "— Anarchy Track —\n" + " ".join(["✖️","✖️","✖️"][:self.anarchy_progress]+["◻️","◻️","◻️"][self.anarchy_progress-3:])
         elif to_show == "players":
-            message = "— Presidential Order —\n" + " ➡️ ".join(self.players-self.dead_players) + " 🔁"
+            message = "— Presidential Order —\n" + " ➡️ ".join([player for player in self.players if player not in self.dead_players]) + " 🔁"
         elif to_show == "deck_stats":
             message = "There are {} policies left in the draw pile, {} in the discard pile.".format(len(self.deck), len(self.discard))
         elif to_show == "deck_stats_detailed":
