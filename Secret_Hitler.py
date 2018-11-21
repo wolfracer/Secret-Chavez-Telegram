@@ -575,6 +575,7 @@ class Game(object):
             self.vetoable_polcy = None
 
             self.anarchy_progress = 1
+            self.advance_presidency()
             # counter must be at 0 because an election must have just succeeded
 
     def pass_policy(self, policy, on_anarchy=False):
