@@ -156,11 +156,11 @@ class Game(object):
         message = ""
         to_show, rest = things_to_show[0], things_to_show[1:]
         if to_show == "liberal":
-            message = "— Liberal Track —\n" + " ".join(["✖️","✖️","✖️","✖️","✖️"][self.liberal:]+["◻️","◻️","◻️","◻️","🕊"][self.liberal-5:])
+            message = "— Liberal Track —\n" + " ".join(["✖️","✖️","✖️","✖️","✖️"][:self.liberal]+["◻️","◻️","◻️","◻️","🕊"][self.liberal-5:])
         elif to_show == "fascist":
-            message = "— Fascist Track —\n" + " ".join(["✖️","✖️","✖️","✖️","✖️","✖️"][self.fascist:]+["◻️","◻️","◻️","◻️","◻️","☠️"][self.fascist-6:])
+            message = "— Fascist Track —\n" + " ".join(["✖️","✖️","✖️","✖️","✖️","✖️"][:self.fascist]+["◻️","◻️","◻️","◻️","◻️","☠️"][self.fascist-6:])
         elif to_show == "anarchy":
-            message = "— Anarchy Track —\n" + " ".join(["✖️","✖️","✖️"][self.anarchy_progress:]+["◻️","◻️","◻️"][self.anarchy_progress-3:])
+            message = "— Anarchy Track —\n" + " ".join(["✖️","✖️","✖️"][:self.anarchy_progress]+["◻️","◻️","◻️"][self.anarchy_progress-3:])
         elif to_show == "players":
             message = "— Presidential Order —\n" + " ➡️ ".join(self.players-self.dead_players) + " 🔁"
         elif to_show == "deck_stats":
