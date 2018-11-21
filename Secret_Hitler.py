@@ -7,7 +7,15 @@ import time
 from enum import Enum
 from telegram.error import Unauthorized, TelegramError
 
-import re
+# Fix for #14
+import sys, unicodedata, re
+all_unicode_chars = (unichr(i) for i in xrange(sys.maxunicode))
+non_printable_chars = ''.join(c for c in all_chars if unicodedata.category(c) == 'Cc')
+non_printable_regex = re.compile('[%s]' % re.escape(control_chars))
+def strip_non_printable(s):
+    return control_char_re.sub('', s)
+# /Fix for #14
+
 markdown_regex = re.compile(".*((\[.*\]\(.*\))|\*|_|`).*")
 
 BOT_USERNAME = "SuperSecretHitlerBot"
@@ -304,6 +312,7 @@ class Game(object):
         Check if a name is valid. If it is valid, return None, otherwise,
         return an appropriate error message about why the name is not valid.
         """
+        name = strip_non_printable(name) # Fix for #14
         for forbidden_name in ("hitler", "me too thanks"):
             if name.lower() == forbidden_name:
                 return "Error: {} is not a valid name because it is too similar to {}".format(name, forbidden_name)
