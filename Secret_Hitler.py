@@ -7,6 +7,15 @@ import time
 from enum import Enum
 from telegram.error import Unauthorized, TelegramError
 
+# Fix for #14
+import sys, unicodedata, re
+all_unicode_chars = (unichr(i) for i in xrange(sys.maxunicode))
+non_printable_chars = ''.join(c for c in all_chars if unicodedata.category(c) == 'Cc')
+non_printable_regex = re.compile('[%s]' % re.escape(control_chars))
+def strip_non_printable(s):
+    return control_char_re.sub('', s)
+# /Fix for #14
+
 BOT_USERNAME = "SuperSecretHitlerBot"
 BLAME_RATELIMIT = 69 # seconds
 TESTING = (__name__ == "__main__") # test whenever this file is run directly
