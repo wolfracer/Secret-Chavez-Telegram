@@ -7,6 +7,9 @@ import time
 from enum import Enum
 from telegram.error import Unauthorized, TelegramError
 
+import re
+markdown_regex = re.compile(".*((\[.*\]\(.*\))|\*|_|`).*")
+
 BOT_USERNAME = "SuperSecretHitlerBot"
 BLAME_RATELIMIT = 69 # seconds
 TESTING = (__name__ == "__main__") # test whenever this file is run directly
@@ -311,7 +314,8 @@ class Game(object):
         if name.endswith("(TL)") or name.endswith("(P)") or name.endswith("(C)") \
             or name.endswith("(RIP)") or name.endswith("(CNH)"):
             return "Error: names cannot spoof the annotations from /listplayers"
-
+        if markdown_regex.match(name):
+            return "Error: names cannot contain markdown characters"
         for p in self.players:
             if p != current_player and p.name.lower() == name.lower():
                 return "Error: name '{}' is already taken".format(name)
