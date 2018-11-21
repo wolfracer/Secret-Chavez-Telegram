@@ -39,7 +39,9 @@ def newgame_handler(bot, update, chat_data):
     game = chat_data.get("game_obj")
 
     chat_id = update.message.chat.id
-    if game is not None and game.game_state != Secret_Hitler.GameStates.GAME_OVER and update.message.text.find("confirm") == -1:
+    if update.message.chat.type == "private":
+        bot.send_message(chat_id=chat_id, text="You can’t create a game in a private chat!")
+    elif game is not None and game.game_state != Secret_Hitler.GameStates.GAME_OVER and update.message.text.find("confirm") == -1:
         bot.send_message(chat_id=chat_id, text="Warning: game already in progress here. Reply '/newgame confirm' to confirm")
     else:
         if game is not None: # properly end that game

@@ -16,6 +16,8 @@ def strip_non_printable(s):
     return control_char_re.sub('', s)
 # /Fix for #14
 
+markdown_regex = re.compile(".*((\[.*\]\(.*\))|\*|_|`).*")
+
 BOT_USERNAME = "SuperSecretHitlerBot"
 BLAME_RATELIMIT = 69 # seconds
 TESTING = (__name__ == "__main__") # test whenever this file is run directly
@@ -148,6 +150,52 @@ class Game(object):
 
     def reset_blame_ratelimit(self):
         self.last_blame = time.time() - BLAME_RATELIMIT
+
+    def show(self, things_to_show = ["liberal","fascist","","anarchy","","players","","deck_stats","","hitler_warning"]):
+        """
+        Builds a textual representation of selected board stats,
+        including:
+        - Victory tracks
+            - liberal                           "liberal"
+            - fascist                           "fascist"
+        - Anarchy tracker                       "anarchy"
+        - Player order                          "players"
+        - Draw/Discard pile information         "deck_stats"
+            - detailed info on policies         "deck_stats_detailed"
+        - HitlerZone information                "hitler_warning"
+        - A blank line                          ""
+        """
+        message = ""
+        to_show, rest = things_to_show[0], things_to_show[1:]
+        if to_show == "liberal":
+            message = "— Liberal Track —\n" + " ".join(["✖️","✖️","✖️","✖️","✖️"][:self.liberal]+["◻️","◻️","◻️","◻️","🕊"][self.liberal-5:])
+        elif to_show == "fascist":
+            fascist_track = ["◻️","◻️","🔮","🗡","🗡","☠️"]
+            if self.num_players > 6:
+                fascist_track[2] = "👔"
+                fascist_track[1] = "🔎"
+            if self.num_players > 8:
+                fascist_track[0] = "🔎"
+            message = "— Fascist Track —\n" + " ".join(["✖️","✖️","✖️","✖️","✖️","✖️"][:self.fascist]+fascist_track[self.fascist-6:])
+        elif to_show == "anarchy":
+            message = "— Anarchy Track —\n" + " ".join(["✖️","✖️","✖️"][:self.anarchy_progress]+["◻️","◻️","◻️"][self.anarchy_progress-3:])
+        elif to_show == "players":
+            message = "— Presidential Order —\n" + " ➡️ ".join([player.name for player in self.players if player not in self.dead_players]) + " 🔁"
+        elif to_show == "deck_stats":
+            message = "There are {} policies left in the draw pile, {} in the discard pile.".format(len(self.deck), len(self.discard))
+        elif to_show == "deck_stats_detailed":
+            message = "There are {} liberal and {} fascist policies in both piles combined.".format(6 - self.liberal, 11 - self.fascist)
+        elif to_show == "hitler_warning":
+            if self.fascist >= 3:
+                message += "‼️ Beware: If Hitler gets elected as Chancellor, the fascists win the game! ‼️"
+        elif to_show == "":
+            message += "\n"
+        elif len(to_show) > 0:
+            message += "(I don’t know what you mean by “{}”)".format(to_show)
+        if len(rest)>0:
+            message += "\n" + self.show(rest)
+        return message
+
     def start_game(self):
         """
         Starts a game:
@@ -275,7 +323,8 @@ class Game(object):
         if name.endswith("(TL)") or name.endswith("(P)") or name.endswith("(C)") \
             or name.endswith("(RIP)") or name.endswith("(CNH)"):
             return "Error: names cannot spoof the annotations from /listplayers"
-
+        if markdown_regex.match(name):
+            return "Error: names cannot contain markdown characters"
         for p in self.players:
             if p != current_player and p.name.lower() == name.lower():
                 return "Error: name '{}' is already taken".format(name)
@@ -338,7 +387,14 @@ class Game(object):
             self.global_message("Player {} left, so this game is self-destructing".format(p))
             self.set_game_state(GameStates.GAME_OVER)
             return
-        self.global_message("Player {} has left".format(p))
+        leave_message = "Player {} has left".format(p)
+        # If we're staging a new game, show updated staging info
+        if self.game_state == GameStates.ACCEPT_PLAYERS:
+            if self.num_players < 5:
+                leave_message += "\nYou need {} more players before you can start.".format(["5️⃣","4️⃣","3️⃣","2️⃣","1️⃣"][self.num_players],"" if self.num_players==4 else "s")
+            else:
+                leave_message += "\nType /startgame to start the game with {} players!".format(self.num_players)
+        self.global_message(leave_message)
 
     def select_chancellor(self, target):
         """
@@ -424,7 +480,7 @@ class Game(object):
         # assert self.election_is_done()
         election_result = self.election_call()
 
-        self.global_message("JA!" if election_result else "NEIN! Election Tracker is at {}/3".format(self.anarchy_progress + 1))
+        self.global_message("JA!" if election_result else "NEIN!")
         self.global_message(self.election_results())
 
         vote_bits = "".join([{True: "1", False: "0", None: "-"}[vote] for vote in self.votes])
@@ -532,6 +588,7 @@ class Game(object):
             self.vetoable_polcy = None
 
             self.anarchy_progress = 1
+            self.advance_presidency()
             # counter must be at 0 because an election must have just succeeded
 
     def pass_policy(self, policy, on_anarchy=False):
@@ -552,10 +609,7 @@ class Game(object):
         if not on_anarchy and self.game_state == GameStates.LEG_CHANCY: # don't need to wait for other decisison
             self.advance_presidency()
 
-        self.global_message("NEW BOARD STATE\n" \
-            + "{} Fascist\n{} Liberal\n".format(self.fascist, self.liberal) \
-            + "{} in draw pile, {} in discard pile".format(len(self.deck), len(self.discard))
-        )
+        self.global_message(self.show())
 
     def pass_liberal(self):
         """
@@ -692,6 +746,7 @@ class Game(object):
 
         self.termlimited_players.clear()
         self.anarchy_progress = 0
+        self.advance_presidency()
 
     def end_game(self, winning_party, reason):
         """
@@ -846,7 +901,13 @@ class Game(object):
                 elif not from_player.join_game(self):
                     return "Error: you've already joined another game! Leave/end that one to play here."
                 self.add_player(from_player)
-                return "Welcome, {}! Make sure to [message me directly](t.me/{}) before the game starts so I can send you secret information.".format(from_player.name, BOT_USERNAME)
+                welcome_message = "Welcome, {}! Make sure to [message me directly](t.me/{}) before the game starts so I can send you secret information.".format(from_player.name, BOT_USERNAME)
+                # Show updated staging info
+                if self.num_players < 5:
+                    welcome_message += "\nYou need {} more players before you can start.".format(["5️⃣","4️⃣","3️⃣","2️⃣","1️⃣"][self.num_players],"" if self.num_players==4 else "s")
+                else:
+                    welcome_message += "\nType /startgame to start the game with {} players!".format(self.num_players)
+                return welcome_message
             elif command == "startgame":
                 if self.num_players < 5:
                     return "Error: only {} players".format(self.num_players)
@@ -862,11 +923,11 @@ class Game(object):
             else:
                 return "Error: game has not started"
         if command == "boardstats":
-            return "{} Fascist / {} Liberal".format(self.fascist, self.liberal)
+            return self.show()
         elif command == "deckstats":
-            return "{} tiles in deck, {} in discard. {} F / {} L in deck/discard (combined)".format(len(self.deck), len(self.discard), 11 - self.fascist, 6 - self.liberal)
+            return self.show(["deck_stats", "deck_stats_detailed"])
         elif command == "anarchystats":
-            return "Election tracker is at {}/3".format(self.anarchy_progress)
+            return self.show(["anarchy"])
         elif command == "blame":
             if time.time() - self.last_blame < BLAME_RATELIMIT:
                 from_player.send_message("Hey, slow down!")
