@@ -223,12 +223,6 @@ def save_game(bot, update, chat_data, user_data):
         bot.send_message(chat_id=update.message.chat_id,
                          text="Saved game in current state as '{}'".format(fname))
 
-def blaze_handler(bot, update):
-    current_time = time.localtime()
-    if current_time.tm_hour in (4, 16) and current_time.tm_min == 20:
-        bot.send_message(chat_id=update.message.chat_id,
-            text="/blazeit")
-
 if __name__ == "__main__":
     restored_players = {}
     if len(sys.argv) > 1:
@@ -250,17 +244,11 @@ if __name__ == "__main__":
 
     dispatcher.add_handler(CommandHandler('newgame', newgame_handler, pass_chat_data=True))
     dispatcher.add_handler(CommandHandler('cancelgame', cancelgame_handler, pass_chat_data=True))
-    dispatcher.add_handler(CommandHandler(['leave', 'byebitch'], leave_handler, pass_user_data=True))
+    dispatcher.add_handler(CommandHandler('leave', leave_handler, pass_user_data=True))
 
     dispatcher.add_handler(CommandHandler(Secret_Hitler.Game.ACCEPTED_COMMANDS + tuple(COMMAND_ALIASES.keys()), game_command_handler, pass_chat_data=True, pass_user_data=True))
     dispatcher.add_handler(CommandHandler('savegame', save_game, pass_chat_data=True, pass_user_data=True))
 
-    # memes
-    dispatcher.add_handler(CommandHandler('wee', (lambda bot, update : bot.send_message(chat_id=update.message.chat.id, text="/hoo")) ))
-    dispatcher.add_handler(CommandHandler('hoo', (lambda bot, update : bot.send_message(chat_id=update.message.chat.id, text="/wee")) ))
-    dispatcher.add_handler(CommandHandler('hi', (lambda bot, update : bot.send_message(chat_id=update.message.chat.id, text="/hi")) ))
-    dispatcher.add_handler(CommandHandler('vore', (lambda bot, update : bot.send_message(chat_id=update.message.chat.id, text="Error: 1930s Germany is a no vore zone")) ))
-    dispatcher.add_handler(MessageHandler(~ Filters.command, blaze_handler))
 
     dispatcher.add_error_handler(handle_error)
 
