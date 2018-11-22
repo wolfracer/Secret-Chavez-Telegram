@@ -6,31 +6,37 @@ import time
 from enum import Enum
 from telegram.error import Unauthorized, TelegramError
 
-
 # Fix for #14
 import sys, unicodedata, re
+
 all_unicode_chars = (chr(i) for i in range(sys.maxunicode))
 non_printable_chars = ''.join(c for c in all_unicode_chars if unicodedata.category(c) == 'Cc')
-non_printable_regex = re.compile('[%s]' % re.escape(non_printable_chars))
+non_printable_regex = re.compile('[%s]'%re.escape(non_printable_chars))
+
+
 def strip_non_printable(s):
     return non_printable_regex.sub('', s)
+
+
 # /Fix for #14
 
 markdown_regex = re.compile(".*((\[.*\]\(.*\))|\*|_|`).*")
 
 with open("config/username", "r") as f:
     BOT_USERNAME = f.read().rstrip()
-BLAME_RATELIMIT = 69 # seconds
-TESTING = (__name__ == "__main__") # test whenever this file is run directly
+BLAME_RATELIMIT = 69  # seconds
+TESTING = (__name__ == "__main__")  # test whenever this file is run directly
 # set TESTING to True to simulate a game locally
 if not TESTING:
     import bot_telegram
-    telegram_errors = [ ]
+
+    telegram_errors = []
 
     # unnecessary in TESTING mode
 
 EVERYONE_HITLER = False
 EVERYONE_HITLER_EXPLANATION = "Hi, the game admins set the EVERYONE_HITLER flag, so you are not the only Hitler, so the game will keep going."
+
 
 class Player(object):
     """
@@ -45,6 +51,7 @@ class Player(object):
         self.name = _name
         self.game = None
         self.role = None
+
     def __str__(self):
         return self.name
 
@@ -60,6 +67,7 @@ class Player(object):
                     # network issues can cause errors in Telegram
                 else:
                     raise e
+
     def get_markdown_tag(self):
         return "[{}](tg://user?id={})".format(self.name, self.id)
 
@@ -76,11 +84,11 @@ class Player(object):
             self.game = _game
             return True
         else:
-            return False # user must first deal with leaving their current game
+            return False  # user must first deal with leaving their current game
 
     def leave_game(self, confirmed=False):
         if self.game is None:
-            return True # nothing to leave
+            return True  # nothing to leave
         elif confirmed:
             # TODO after testing, don't require confirmation to leave these games
             # or self.game.game_state in (GameStates.GAME_OVER, GameStates.ACCEPT_PLAYERS):
@@ -91,8 +99,9 @@ class Player(object):
 
             return True
         else:
-            return False # must confirm to successfully leave a game in one
-                         # of the more significant states
+            return False  # must confirm to successfully leave a game in one
+            # of the more significant states
+
 
 class GameStates(Enum):
     ACCEPT_PLAYERS = 1
@@ -105,8 +114,11 @@ class GameStates(Enum):
     SPECIAL_ELECTION = 8
     EXECUTION = 9
     GAME_OVER = 10
+
+
 class GameOverException(Exception):
     pass
+
 
 class Game(object):
     def __init__(self, chat_id):
@@ -117,7 +129,7 @@ class Game(object):
             self.deck = ['F', 'F', 'L', 'F', 'F', 'L', 'F', 'F', 'L', 'F', 'F', 'L', 'F', 'F', 'L', 'F', 'L']
         else:
             self.deck = ['L', 'L', 'L', 'L', 'L', 'L',
-                        'F', 'F', 'F', 'F', 'F', 'F', 'F', 'F', 'F', 'F', 'F']
+                         'F', 'F', 'F', 'F', 'F', 'F', 'F', 'F', 'F', 'F', 'F']
             random.shuffle(self.deck)
 
         self.global_chat = chat_id
@@ -152,7 +164,8 @@ class Game(object):
     def reset_blame_ratelimit(self):
         self.last_blame = time.time() - BLAME_RATELIMIT
 
-    def show(self, things_to_show = ["liberal","fascist","","anarchy","","players","","deck_stats","","hitler_warning"]):
+    def show(self, things_to_show=["liberal", "fascist", "", "anarchy", "", "players", "", "deck_stats", "",
+                                   "hitler_warning"]):
         """
         Builds a textual representation of selected board stats,
         including:
@@ -169,23 +182,29 @@ class Game(object):
         message = ""
         to_show, rest = things_to_show[0], things_to_show[1:]
         if to_show == "liberal":
-            message = "— Liberal Track —\n" + " ".join(["✖️","✖️","✖️","✖️","✖️"][:self.liberal]+["◻️","◻️","◻️","◻️","🕊"][self.liberal-5:])
+            message = "— Liberal Track —\n" + " ".join(
+                ["✖️", "✖️", "✖️", "✖️", "✖️"][:self.liberal] + ["◻️", "◻️", "◻️", "◻️", "🕊"][self.liberal - 5:])
         elif to_show == "fascist":
-            fascist_track = ["◻️","◻️","🔮","🗡","🗡","☠️"]
+            fascist_track = ["◻️", "◻️", "🔮", "🗡", "🗡", "☠️"]
             if self.num_players > 6:
                 fascist_track[2] = "👔"
                 fascist_track[1] = "🔎"
             if self.num_players > 8:
                 fascist_track[0] = "🔎"
-            message = "— Fascist Track —\n" + " ".join(["✖️","✖️","✖️","✖️","✖️","✖️"][:self.fascist]+fascist_track[self.fascist-6:])
+            message = "— Fascist Track —\n" + " ".join(
+                ["✖️", "✖️", "✖️", "✖️", "✖️", "✖️"][:self.fascist] + fascist_track[self.fascist - 6:])
         elif to_show == "anarchy":
-            message = "— Anarchy Track —\n" + " ".join(["✖️","✖️","✖️"][:self.anarchy_progress]+["◻️","◻️","◻️"][:3-self.anarchy_progress])
+            message = "— Anarchy Track —\n" + " ".join(
+                ["✖️", "✖️", "✖️"][:self.anarchy_progress] + ["◻️", "◻️", "◻️"][:3 - self.anarchy_progress])
         elif to_show == "players":
-            message = "— Presidential Order —\n" + " ➡️ ".join([player.name for player in self.players if player not in self.dead_players]) + " 🔁"
+            message = "— Presidential Order —\n" + " ➡️ ".join(
+                [player.name for player in self.players if player not in self.dead_players]) + " 🔁"
         elif to_show == "deck_stats":
-            message = "There are {} policies left in the draw pile, {} in the discard pile.".format(len(self.deck), len(self.discard))
+            message = "There are {} policies left in the draw pile, {} in the discard pile.".format(len(self.deck),
+                                                                                                    len(self.discard))
         elif to_show == "deck_stats_detailed":
-            message = "There are {} liberal and {} fascist policies in both piles combined.".format(6 - self.liberal, 11 - self.fascist)
+            message = "There are {} liberal and {} fascist policies in both piles combined.".format(6 - self.liberal,
+                                                                                                    11 - self.fascist)
         elif to_show == "hitler_warning":
             if self.fascist >= 3:
                 message += "‼️ Beware: If Hitler gets elected as Chancellor, the fascists win the game! ‼️"
@@ -193,7 +212,7 @@ class Game(object):
             message += "\n"
         elif len(to_show) > 0:
             message += "(I don’t know what you mean by “{}”)".format(to_show)
-        if len(rest)>0:
+        if len(rest) > 0:
             message += "\n" + self.show(rest)
         return message
 
@@ -205,7 +224,7 @@ class Game(object):
         - begin presidential rotation with the first presidnet nominating their chancellor
         """
 
-        random.shuffle(self.players) # randomize seating order
+        random.shuffle(self.players)  # randomize seating order
         self.global_message("Randomized seating order:\n" + self.list_players())
 
         self.num_players = len(self.players)
@@ -214,7 +233,8 @@ class Game(object):
         self.reset_blame_ratelimit()
 
         if TESTING:
-            roles = ["Liberal", "Fascist", "Liberal", "Hitler", "Liberal", "Liberal", "Fascist", "Liberal", "Fascist", "Liberal"]
+            roles = ["Liberal", "Fascist", "Liberal", "Hitler", "Liberal", "Liberal", "Fascist", "Liberal", "Fascist",
+                     "Liberal"]
             for i in range(len(self.players)):
                 self.players[i].set_role(roles[i])
                 # NOTE: testing configuration does not "notify" fascists of night-phase info (if this breaks, it'll be apparent pretty quickly)
@@ -223,11 +243,11 @@ class Game(object):
                 for p in self.players:
                     p.set_role("Hitler")
             else:
-                if self.num_players == 5 or self.num_players == 6: # 1F + H
+                if self.num_players == 5 or self.num_players == 6:  # 1F + H
                     fascists = random.sample(self.players, 2)
-                elif self.num_players == 7 or self.num_players == 8: # 2F + H
+                elif self.num_players == 7 or self.num_players == 8:  # 2F + H
                     fascists = random.sample(self.players, 3)
-                elif self.num_players == 9 or self.num_players == 10: # 3F + H
+                elif self.num_players == 9 or self.num_players == 10:  # 3F + H
                     fascists = random.sample(self.players, 4)
                 else:
                     raise Exception("Invalid number of players")
@@ -242,11 +262,16 @@ class Game(object):
                         if self.num_players <= 6:
                             p.send_message("Hitler: {}".format(fascists[0]))
                         else:
-                            p.send_message("Other Fascist{}: {}\nHitler: {}".format("s" if len(fascists) > 3 else "", ", ".join([ other_p.name for other_p in fascists[1:] if other_p != p ]), fascists[0]))
+                            p.send_message("Other Fascist{}: {}\nHitler: {}".format("s" if len(fascists) > 3 else "",
+                                                                                    ", ".join(
+                                                                                        [other_p.name for other_p in
+                                                                                         fascists[1:] if other_p != p]),
+                                                                                    fascists[0]))
                     else:
                         p.set_role("Liberal")
 
-        self.record_data("ROLES:\n" + "\n".join(["{} - {}".format(p, p.role) for p in self.players]) + "\n\n", spectator_only=True)
+        self.record_data("ROLES:\n" + "\n".join(["{} - {}".format(p, p.role) for p in self.players]) + "\n\n",
+                         spectator_only=True)
 
         self.president = self.players[0]
         self.set_game_state(GameStates.CHANCY_NOMINATION)
@@ -274,10 +299,12 @@ class Game(object):
                 p.send_message(msg)
         else:
             self.public_history += msg
+
     def add_spectator(self, target):
         if target not in self.spectators:
             self.spectators.add(target)
             target.send_message(self.spectator_history)
+
     def remove_spectator(self, target):
         if target in self.spectators:
             self.spectators.remove(target)
@@ -289,12 +316,13 @@ class Game(object):
         Returns "F", "L", or None (if the policy could not be determined)
         """
         vote_str = vote_str.lower()
-        if vote_str in ("f", "fascist", "r", "red") or vote_str.replace(" ","").find("spicy") != -1:
+        if vote_str in ("f", "fascist", "r", "red") or vote_str.replace(" ", "").find("spicy") != -1:
             return "F"
-        elif vote_str in ("l", "liberal", "b", "blue") or vote_str.replace(" ","").find("nice") != -1:
+        elif vote_str in ("l", "liberal", "b", "blue") or vote_str.replace(" ", "").find("nice") != -1:
             return "L"
         else:
             return None
+
     def get_player(self, player_str):
         """
         Helper function for getting a player from their index or name (which they could be referred to by).
@@ -304,7 +332,7 @@ class Game(object):
             return self.players[int(player_str) - 1]
         else:
             for p in self.players:
-                if p.name.lower() == player_str.lower(): #p.name.find(player_str) != -1:
+                if p.name.lower() == player_str.lower():  # p.name.find(player_str) != -1:
                     return p
             return None
 
@@ -313,7 +341,7 @@ class Game(object):
         Check if a name is valid. If it is valid, return None, otherwise,
         return an appropriate error message about why the name is not valid.
         """
-        name = strip_non_printable(name) # Fix for #14
+        name = strip_non_printable(name)  # Fix for #14
         for forbidden_name in ("hitler", "me too thanks"):
             if name.lower() == forbidden_name:
                 return "Error: {} is not a valid name because it is too similar to {}".format(name, forbidden_name)
@@ -322,7 +350,7 @@ class Game(object):
             return "Error: name cannot be a number between 1 and 10"
 
         if name.endswith("(TL)") or name.endswith("(P)") or name.endswith("(C)") \
-            or name.endswith("(RIP)") or name.endswith("(CNH)"):
+                or name.endswith("(RIP)") or name.endswith("(CNH)"):
             return "Error: names cannot spoof the annotations from /listplayers"
         if markdown_regex.match(name):
             return "Error: names cannot contain markdown characters"
@@ -357,6 +385,7 @@ class Game(object):
             ret += "({}) {}{}\n".format(i + 1, self.players[i], status)
 
         return ret
+
     def add_player(self, p):
         """
         Given a Player p, add them to the game.
@@ -373,12 +402,12 @@ class Game(object):
         (reveal all player roles and declare game over).
         """
         if p not in self.players:
-            return # alredy "removed" because not in
+            return  # alredy "removed" because not in
         elif self.game_state == GameStates.ACCEPT_PLAYERS:
             self.players.remove(p)
             self.votes.pop()
             self.num_players -= 1
-        elif p in self.dead_players: # TODO probably unnecessary
+        elif p in self.dead_players:  # TODO probably unnecessary
             index = self.players.index(p)
             self.players.pop(index)
             self.votes.pop(index)
@@ -392,7 +421,8 @@ class Game(object):
         # If we're staging a new game, show updated staging info
         if self.game_state == GameStates.ACCEPT_PLAYERS:
             if self.num_players < 5:
-                leave_message += "\nYou need {} more players before you can start.".format(["5️⃣","4️⃣","3️⃣","2️⃣","1️⃣"][self.num_players],"" if self.num_players==4 else "s")
+                leave_message += "\nYou need {} more players before you can start.".format(
+                    ["5️⃣", "4️⃣", "3️⃣", "2️⃣", "1️⃣"][self.num_players], "" if self.num_players == 4 else "s")
             else:
                 leave_message += "\nType /startgame to start the game with {} players!".format(self.num_players)
         self.global_message(leave_message)
@@ -408,7 +438,7 @@ class Game(object):
             self.chancellor = target
 
             self.global_message("President {} has nominated Chancellor {}.".format(self.president, self.chancellor))
-            #self.global_message("Now voting on {}/{}".format(self.president, self.chancellor))
+            # self.global_message("Now voting on {}/{}".format(self.president, self.chancellor))
             self.set_game_state(GameStates.ELECTION)
             self.record_data("{}/{} ".format(self.president, self.chancellor), spectator_only=False)
 
@@ -420,18 +450,22 @@ class Game(object):
         Casts a vote for a player.
         """
         self.players[self.players.index(player)] = vote
+
     def list_nonvoters(self):
         """
         Assumes current state is ELECTION.
         List (and tags) all players who have not voted, separated by newlines.
         """
-        return "\n".join([ self.players[i].get_markdown_tag() for i in range(self.num_players) if self.votes[i] is None and self.players[i] not in self.dead_players ])
+        return "\n".join([self.players[i].get_markdown_tag() for i in range(self.num_players) if
+                          self.votes[i] is None and self.players[i] not in self.dead_players])
+
     def election_is_done(self):
         """
         Assumes current state is ELECTION.
         Determine whether an election is done (all alive players have voted)
         """
         return self.votes.count(None) == self.num_dead_players
+
     def election_call(self):
         """
         Assumes current state is ELECTION.
@@ -440,18 +474,22 @@ class Game(object):
          - False if failed
          - None if result cannot yet be determined
         """
-        if self.votes.count(True) > self.num_alive_players / 2:
+        if self.votes.count(True) > self.num_alive_players/2:
             return True
-        elif self.votes.count(False) >= self.num_alive_players / 2:
+        elif self.votes.count(False) >= self.num_alive_players/2:
             return False
         else:
             return None
+
     def election_results(self):
         """
         Assumes current state is ELECTION.
         Get election results in user-friendy format (list of "player - vote" strings, separated by newlines)
         """
-        return "\n".join([ "{} - {}".format(self.players[i], "ja" if self.votes[i] else "nein") for i in range(self.num_players) if self.players[i] not in self.dead_players])
+        return "\n".join(
+            ["{} - {}".format(self.players[i], "ja" if self.votes[i] else "nein") for i in range(self.num_players) if
+             self.players[i] not in self.dead_players])
+
     def update_termlimits(self):
         """
         Updates term-limits:
@@ -510,7 +548,7 @@ class Game(object):
 
             self.advance_presidency()
 
-        self.votes = [None] * self.num_players
+        self.votes = [None]*self.num_players
 
     def president_legislate(self, discard):
         """
@@ -526,6 +564,7 @@ class Game(object):
             return True
         else:
             return False
+
     def chancellor_legislate(self, enact):
         """
         Performs the chancellor's legislative action: enacts the given policy
@@ -544,12 +583,14 @@ class Game(object):
             return True
         else:
             return False
+
     def check_reshuffle(self):
         """
         Check if the deck needs to be reshuffled (has <= 3 policies remaining).
         If it does, reshuffles the deck and announces this.
         """
-        if len(self.deck) <= 3: # NOTE: official rules say not to shuffle when there are 3 policies but this is a house rule
+        if len(
+                self.deck) <= 3:  # NOTE: official rules say not to shuffle when there are 3 policies but this is a house rule
             self.deck.extend(self.discard)
             del self.discard[:]
 
@@ -570,7 +611,7 @@ class Game(object):
            * Announces who (first) blocked the veto
            * Passes the chosen policy
         """
-        if False in (self.president_veto_vote, self.chancellor_veto_vote): # no veto
+        if False in (self.president_veto_vote, self.chancellor_veto_vote):  # no veto
             if self.president_veto_vote is False:
                 non_vetoer = "President " + str(self.president)
             else:
@@ -579,8 +620,8 @@ class Game(object):
             self.global_message("{} has refused to veto".format(non_vetoer))
             self.pass_policy(self.vetoable_polcy)
             self.vetoable_polcy = None
-            self.advance_presidency() # TODO: test presidential succession when veto occurrs
-        elif self.president_veto_vote and self.chancellor_veto_vote: # veto
+            self.advance_presidency()  # TODO: test presidential succession when veto occurrs
+        elif self.president_veto_vote and self.chancellor_veto_vote:  # veto
             self.global_message("VETO!")
             self.record_data(" - veto!\n", spectator_only=False)
 
@@ -607,7 +648,7 @@ class Game(object):
         self.record_data(policy + "\n", spectator_only=False)
 
         self.check_reshuffle()
-        if not on_anarchy and self.game_state == GameStates.LEG_CHANCY: # don't need to wait for other decisison
+        if not on_anarchy and self.game_state == GameStates.LEG_CHANCY:  # don't need to wait for other decisison
             self.advance_presidency()
 
         self.global_message(self.show())
@@ -621,6 +662,7 @@ class Game(object):
 
         if self.liberal == 5:
             self.end_game("Liberal", "5 Liberal policies were enacted")
+
     def pass_fascist(self, on_anarchy):
         """
         Pass a fascist policy, announce this fact, check if this creates a fascist victory
@@ -636,14 +678,14 @@ class Game(object):
             self.end_game("Fascist", "6 Fascist policies were enacted")
 
         if on_anarchy:
-            return # any executive powers ignored in anarchy
+            return  # any executive powers ignored in anarchy
 
         if self.fascist == 1 and self.num_players in (9, 10):
             self.set_game_state(GameStates.INVESTIGATION)
         elif self.fascist == 2 and self.num_players in (7, 8, 9, 10):
-                self.set_game_state(GameStates.INVESTIGATION)
+            self.set_game_state(GameStates.INVESTIGATION)
         elif self.fascist == 3:
-            if self.num_players in (5,6): # EXAMINE
+            if self.num_players in (5, 6):  # EXAMINE
                 self.check_reshuffle()
                 self.global_message("President ({}) is examining top 3 policies".format(self.president))
                 self.president.send_message("Top three policies are: ")
@@ -663,18 +705,19 @@ class Game(object):
             target_index += 1
             target_index %= self.num_players
         return self.players[target_index]
+
     def advance_presidency(self):
         """
         Passes presidency to next player in the rotation or, if the previous election was a special election,
         resumes the normal rotation.
         """
-        if self.last_nonspecial_president == None: # normal rotation
+        if self.last_nonspecial_president == None:  # normal rotation
             self.president = self.next_alive_player(self.president)
-        else: # returning from special election
+        else:  # returning from special election
             self.president = self.next_alive_player(self.last_nonspecial_president)
-            self.last_nonspecial_president = None # indicate that special-election is over
+            self.last_nonspecial_president = None  # indicate that special-election is over
 
-        self.chancellor = None # new president must now nominate chancellor
+        self.chancellor = None  # new president must now nominate chancellor
         self.set_game_state(GameStates.CHANCY_NOMINATION)
 
     def investigate(self, origin, target):
@@ -686,6 +729,7 @@ class Game(object):
         origin.send_message("<{0}> party affiliation is <{0.party}>".format(target))
         self.global_message("{} has investigated {}".format(origin, target))
         self.record_data(" - investigates {}\n".format(target), spectator_only=False)
+
     def deck_peek(self, who, num=3):
         """
         Sends player `who` a message indicating the top `num` policy tiles.
@@ -698,6 +742,7 @@ class Game(object):
         spectator_who = spectator_who.format(who)
 
         self.record_data(" - {} peeks at {}\n".format(spectator_who, policies), spectator_only=True)
+
     def special_elect(self, target):
         """
         Simulate a special election:
@@ -707,7 +752,7 @@ class Game(object):
         Returns True if successful and False if input was invalid (tried to nominate self)
         """
         if target == self.president:
-            return False # cannot special elect self
+            return False  # cannot special elect self
 
         self.last_nonspecial_president = self.president
         self.president = target
@@ -765,7 +810,7 @@ class Game(object):
         """
 
         if self.game_state == new_state and not repeat:
-            return # don't repeat state change unless specifically requested
+            return  # don't repeat state change unless specifically requested
 
         self.game_state = new_state
         self.reset_blame_ratelimit()
@@ -774,8 +819,9 @@ class Game(object):
             self.global_message("President {} must nominate a chancellor".format(self.president))
             self.president.send_message("Pick your chancellor!\n(\"/nominate [player name or index]\")")
         elif self.game_state == GameStates.ELECTION:
-            self.global_message("Election: Vote on President {} and Chancellor {}".format(self.president, self.chancellor))
-            for p in self.players: # send individual messages to clarify who you're voting on
+            self.global_message(
+                "Election: Vote on President {} and Chancellor {}".format(self.president, self.chancellor))
+            for p in self.players:  # send individual messages to clarify who you're voting on
                 if p not in self.dead_players:
                     p.send_message("{}/{} vote (\"/ja\" or \"/nein\"):".format(self.president, self.chancellor))
         elif self.game_state == GameStates.LEG_PRES:
@@ -787,20 +833,26 @@ class Game(object):
             self.chancellor.send_message("Pick a policy to enact!\n(\"/enact [POLICY]\")")
             self.deck_peek(self.chancellor, 2)
         elif self.game_state == GameStates.VETO_CHOICE:
-            self.global_message("President ({}) and Chancellor ({}) are deciding whether to veto (both must agree to do so)".format(self.president, self.chancellor))
+            self.global_message(
+                "President ({}) and Chancellor ({}) are deciding whether to veto (both must agree to do so)".format(
+                    self.president, self.chancellor))
             self.president.send_message("Would you like to veto? (\"/ja\" or \"/nein\")")
             self.chancellor.send_message("Would you like to veto? (\"/ja\" or \"/nein\")")
             self.president_veto_vote = None
             self.chancellor_veto_vote = None
         elif self.game_state == GameStates.INVESTIGATION:
             self.global_message("President ({}) must investigate another player".format(self.president))
-            self.president.send_message("Pick a player to investigate!\n(\"/investigate [player name or index]\")" + self.list_players())
+            self.president.send_message(
+                "Pick a player to investigate!\n(\"/investigate [player name or index]\")" + self.list_players())
         elif self.game_state == GameStates.SPECIAL_ELECTION:
-            self.global_message("Special Election: President ({}) must choose the next presidential candidate".format(self.president))
-            self.president.send_message("Pick the next presidential candidate!\n(\"/nominate [player name or index]\")" + self.list_players())
+            self.global_message(
+                "Special Election: President ({}) must choose the next presidential candidate".format(self.president))
+            self.president.send_message(
+                "Pick the next presidential candidate!\n(\"/nominate [player name or index]\")" + self.list_players())
         elif self.game_state == GameStates.EXECUTION:
             self.global_message("President ({}) must kill someone".format(self.president))
-            self.president.send_message("Pick someone to kill!\n(\"/kill [player name or index]\")" + self.list_players())
+            self.president.send_message(
+                "Pick someone to kill!\n(\"/kill [player name or index]\")" + self.list_players())
         elif self.game_state == GameStates.GAME_OVER:
             # self.global_message("\n".join(["{} - {}".format(p, p.role) for p in self.players]))
             # reveal all player roles when the game has ended
@@ -809,8 +861,7 @@ class Game(object):
             self.global_message(self.spectator_history)
 
             for p in self.players:
-                p.game = None # allow players to join other games
-
+                p.game = None  # allow players to join other games
 
     def save(self, fname):
         """
@@ -845,9 +896,10 @@ class Game(object):
         return None
 
     ACCEPTED_COMMANDS = ("listplayers", "changename", "joingame", "startgame",
-        "boardstats", "deckstats", "anarchystats", "blame", "ja", "nein",
-        "nominate", "kill", "investigate", "enact", "discard", "whois",
-        "spectate", "unspectate", "logs")
+                         "boardstats", "deckstats", "anarchystats", "blame", "ja", "nein",
+                         "nominate", "kill", "investigate", "enact", "discard", "whois",
+                         "spectate", "unspectate", "logs")
+
     def handle_message(self, from_player, command, args=""):
         """
         Handle the message "/command args" from from_player. Using the game state
@@ -902,10 +954,12 @@ class Game(object):
                 elif not from_player.join_game(self):
                     return "Error: you've already joined another game! Leave/end that one to play here."
                 self.add_player(from_player)
-                welcome_message = "Welcome, {}! Make sure to [message me directly](t.me/{}) before the game starts so I can send you secret information.".format(from_player.name, BOT_USERNAME)
+                welcome_message = "Welcome, {}! Make sure to [message me directly](t.me/{}) before the game starts so I can send you secret information.".format(
+                    from_player.name, BOT_USERNAME)
                 # Show updated staging info
                 if self.num_players < 5:
-                    welcome_message += "\nYou need {} more players before you can start.".format(["5️⃣","4️⃣","3️⃣","2️⃣","1️⃣"][self.num_players],"" if self.num_players==4 else "s")
+                    welcome_message += "\nYou need {} more players before you can start.".format(
+                        ["5️⃣", "4️⃣", "3️⃣", "2️⃣", "1️⃣"][self.num_players], "" if self.num_players == 4 else "s")
                 else:
                     welcome_message += "\nType /startgame to start the game with {} players!".format(self.num_players)
                 return welcome_message
@@ -917,7 +971,7 @@ class Game(object):
                 if blocked:
                     return "Error: All players must have messaged and not blocked @{}! {} must message/unblock me." \
                         .format(BOT_USERNAME, blocked.get_markdown_tag()) \
-                        .replace("_","\\_") # some Markdown escaping may be necessary
+                        .replace("_", "\\_")  # some Markdown escaping may be necessary
 
                 self.start_game()
                 return
@@ -983,28 +1037,29 @@ class Game(object):
             if command == "nominate":
                 if self.game_state == GameStates.CHANCY_NOMINATION:
                     if self.select_chancellor(target):
-                        return None # "You have nominated {} for chancellor.".format(target)
+                        return None  # "You have nominated {} for chancellor.".format(target)
                     else:
                         return "Error: {} is term-limited/dead/yourself.".format(target)
                 elif self.game_state == GameStates.SPECIAL_ELECTION:
                     if self.special_elect(target):
                         self.set_game_state(GameStates.CHANCY_NOMINATION)
-                        return None # "You have nominated {} for president.".format(target)
+                        return None  # "You have nominated {} for president.".format(target)
                     else:
                         return "Error: you can't nominate yourself for president.".format(target)
             elif command == "kill" and self.game_state == GameStates.EXECUTION:
                 if from_player == target and not target_confirmed:
                     return "You are about to kill yourself (technically allowed by the rules). Reply '/kill me too thanks' to confirm suicide."
                 elif from_player.role == "Fascist" and target.role == "Hitler" and not target_confirmed:
-                    from_player.send_message("It looks like you are trying to kill Hitler. You WILL LOSE THE GAME if you proceed. Reply '/kill hitler' to confirm.")
+                    from_player.send_message(
+                        "It looks like you are trying to kill Hitler. You WILL LOSE THE GAME if you proceed. Reply '/kill hitler' to confirm.")
                     return
                 else:
                     self.kill(target)
                     self.advance_presidency()
                     self.global_message("{} has killed {}.".format(from_player, target))
                     target.send_message("You are now dead. RIP. Remember " + \
-                        "that dead players SHOULD NOT TALK, reveal their " + \
-                        "secret role, or otherwise influence the game!" )
+                                        "that dead players SHOULD NOT TALK, reveal their " + \
+                                        "secret role, or otherwise influence the game!")
             elif command == "investigate" and self.game_state == GameStates.INVESTIGATION:
                 self.investigate(from_player, target)
                 self.advance_presidency()
@@ -1051,6 +1106,7 @@ class Game(object):
                     return "Error: Given policy not in top 2"
         else:
             return "/{} is not valid here".format(command)
+
     def TEST_handle(self, player, command, args=""):
         """
         TESTING FUNCTION: run self.handle_message(player, command, args) but print out
@@ -1060,6 +1116,7 @@ class Game(object):
         print("[{}] {} {}".format(player, command, args))
         if response:
             print("[Reply to {}] {}".format(player, response))
+
     def TEST_vote(self, should_pass=True):
         """
         TESTING FUNCTION: use TEST_handle to simulate a unanimous "ja" (or unanimous "nein" if should_pass=False)
@@ -1068,6 +1125,7 @@ class Game(object):
         for p in self.players:
             if p not in self.dead_players:
                 self.TEST_handle(p, "ja" if should_pass else "nein")
+
 
 def test_game():
     game = Game(None)
@@ -1078,50 +1136,51 @@ def test_game():
         Player("4", "D"),
         Player("5", "E"),
         Player("6", "F"),
-        Player("7", "G") ]
+        Player("7", "G")]
 
     for p in players:
         game.add_player(p)
 
     game.TEST_handle(players[2], "startgame")
 
-    game.TEST_handle(players[0], "nominate", "D") # election 1
+    game.TEST_handle(players[0], "nominate", "D")  # election 1
     game.TEST_vote()
 
     game.TEST_handle(players[0], "discard", "L")
-    game.TEST_handle(players[3], "enact", "F") # 0L / 1F
+    game.TEST_handle(players[3], "enact", "F")  # 0L / 1F
 
-    game.TEST_handle(players[1], "nominate", "E") # election 2
+    game.TEST_handle(players[1], "nominate", "E")  # election 2
     game.TEST_vote()
     game.TEST_handle(players[1], "discard", "L")
     game.TEST_handle(players[4], "enact", "F")
 
     game.TEST_handle(players[1], "investigate", "E")
 
-    game.TEST_handle(players[2], "nominate", "F") # election 3
+    game.TEST_handle(players[2], "nominate", "F")  # election 3
     game.TEST_vote()
     game.TEST_handle(players[2], "discard", "L")
     game.TEST_handle(players[5], "enact", "F")
 
-    game.TEST_handle(players[2], "nominate", "B") # special elect
+    game.TEST_handle(players[2], "nominate", "B")  # special elect
 
-    game.TEST_handle(players[1], "nominate", "G") # election 4
+    game.TEST_handle(players[1], "nominate", "G")  # election 4
     game.TEST_vote()
     game.TEST_handle(players[1], "discard", "L")
     game.TEST_handle(players[6], "enact", "F")
 
-    game.TEST_handle(players[1], "kill", "me too thanks") # execution
+    game.TEST_handle(players[1], "kill", "me too thanks")  # execution
 
-    game.TEST_handle(players[3], "nominate", "A") # election 5 - should fail because dead people cannot vote and ties fail
+    game.TEST_handle(players[3], "nominate",
+                     "A")  # election 5 - should fail because dead people cannot vote and ties fail
     game.TEST_handle(players[0], "nein")
-    game.TEST_handle(players[1], "ja") # players[1] is dead
+    game.TEST_handle(players[1], "ja")  # players[1] is dead
     game.TEST_handle(players[2], "ja")
     game.TEST_handle(players[3], "nein")
     game.TEST_handle(players[4], "nein")
     game.TEST_handle(players[5], "ja")
     game.TEST_handle(players[6], "ja")
 
-    game.TEST_handle(players[4], "nominate", "A") # election 6 - fail
+    game.TEST_handle(players[4], "nominate", "A")  # election 6 - fail
     game.TEST_handle(players[0], "nein")
     game.TEST_handle(players[2], "ja")
     game.TEST_handle(players[3], "nein")
@@ -1129,7 +1188,7 @@ def test_game():
     game.TEST_handle(players[5], "ja")
     game.TEST_handle(players[6], "ja")
 
-    game.TEST_handle(players[5], "nominate", "A") # election 7 - fail
+    game.TEST_handle(players[5], "nominate", "A")  # election 7 - fail
     game.TEST_handle(players[0], "nein")
     game.TEST_handle(players[2], "ja")
     game.TEST_handle(players[3], "nein")
@@ -1143,9 +1202,9 @@ def test_game():
     game.TEST_vote()
 
     game.TEST_handle(players[6], "discard", "s p i c y b o i")
-    game.TEST_handle(players[0], "enact", "liberal") # check other policy nomenclature
+    game.TEST_handle(players[0], "enact", "liberal")  # check other policy nomenclature
 
-    game.TEST_handle(players[0], "ja") #veto decisison
+    game.TEST_handle(players[0], "ja")  # veto decisison
     game.TEST_handle(players[6], "nein")
 
     game.TEST_handle(players[0], "nominate", "D")
@@ -1154,10 +1213,11 @@ def test_game():
     game.TEST_handle(players[0], "discard", "l")
     game.TEST_handle(players[3], "enact", "f")
 
-    #veto decisison
+    # veto decisison
     game.TEST_handle(players[0], "nein")
     # Fascist victory
     # game.handle_message(players[6], "ja") # other veto vote shouldn't matter
+
 
 if TESTING:
     test_game()

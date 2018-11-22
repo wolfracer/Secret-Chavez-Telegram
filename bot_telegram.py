@@ -12,11 +12,11 @@ import sys
 import os
 import time
 
-
 with open("config/key", "r") as f:
     API_KEY = f.read().rstrip()
 
 bot = telegram.Bot(token=API_KEY)
+
 
 def get_static_handler(command):
     """
@@ -30,8 +30,9 @@ def get_static_handler(command):
     response = f.read()
 
     return CommandHandler(command, \
-        ( lambda bot, update : \
-        bot.send_message(chat_id=update.message.chat.id, text=response) ) )
+                          (lambda bot, update: \
+                               bot.send_message(chat_id=update.message.chat.id, text=response)))
+
 
 def newgame_handler(bot, update, chat_data):
     """
@@ -42,13 +43,16 @@ def newgame_handler(bot, update, chat_data):
     chat_id = update.message.chat.id
     if update.message.chat.type == "private":
         bot.send_message(chat_id=chat_id, text="You can’t create a game in a private chat!")
-    elif game is not None and game.game_state != Secret_Hitler.GameStates.GAME_OVER and update.message.text.find("confirm") == -1:
-        bot.send_message(chat_id=chat_id, text="Warning: game already in progress here. Reply '/newgame confirm' to confirm")
+    elif game is not None and game.game_state != Secret_Hitler.GameStates.GAME_OVER and update.message.text.find(
+            "confirm") == -1:
+        bot.send_message(chat_id=chat_id,
+                         text="Warning: game already in progress here. Reply '/newgame confirm' to confirm")
     else:
-        if game is not None: # properly end that game
+        if game is not None:  # properly end that game
             game.set_game_state(Secret_Hitler.GameStates.GAME_OVER)
         chat_data["game_obj"] = Secret_Hitler.Game(chat_id)
         bot.send_message(chat_id=chat_id, text="Created game! /joingame to join, /startgame to start")
+
 
 def cancelgame_handler(bot, update, chat_data):
     """
@@ -62,6 +66,7 @@ def cancelgame_handler(bot, update, chat_data):
         raise GameOverException("Game cancelled. Type /newgame to start a new one.")
     else:
         bot.send_message(chat_id=chat_id, text="No game in progress here.")
+
 
 def leave_handler(bot, update, user_data):
     """
@@ -101,12 +106,15 @@ def parse_message(msg):
         command = command[1:]
     args = msg.split()[1:]
     if len(args) == 0:
-        args = "" #None
+        args = ""  # None
     else:
         args = " ".join(args)
     return command, args
 
+
 COMMAND_ALIASES = {"nom": "nominate", "blam": "blame", "dig": "investigate", "log": "logs"}
+
+
 def game_command_handler(bot, update, chat_data, user_data):
     """
     Pass all commands that Secret_Hitler.Game can handle to game's handle_message method
@@ -142,7 +150,7 @@ def game_command_handler(bot, update, chat_data, user_data):
             bot.send_message(chat_id=chat_id, text="Error: no game in progress here. Start one with /newgame")
             return
         else:
-            if args and (game.check_name(args) is None): # args is a valid name
+            if args and (game.check_name(args) is None):  # args is a valid name
                 player = Secret_Hitler.Player(player_id, args)
             else:
                 # TODO: maybe also chack their Telegram first name for validity
@@ -171,11 +179,12 @@ def game_command_handler(bot, update, chat_data, user_data):
         # TODO: it would be cleaner to just have a consumer thread handling
         # these errors as they occur
 
-        if reply: # reply is None if no response is necessary
+        if reply:  # reply is None if no response is necessary
             bot.send_message(chat_id=chat_id, text=reply, parse_mode=telegram.ParseMode.MARKDOWN)
 
     except Secret_Hitler.GameOverException:
         return
+
 
 # Credit (TODO: actual attribution): https://github.com/CaKEandLies/Telegram_Cthulhu/blob/master/cthulhu_game_bot.py#L63
 def feedback_handler(bot, update, args=None):
@@ -200,11 +209,13 @@ def feedback_handler(bot, update, args=None):
         bot.send_message(chat_id=update.message.chat_id,
                          text="Format: /feedback [feedback]")
 
+
 def handle_error(bot, update, error):
     try:
         raise error
     except TelegramError:
         logging.getLogger(__name__).warning('TelegramError! %s caused by this update: %s', error, update)
+
 
 def save_game(bot, update, chat_data, user_data):
     game = None
@@ -218,11 +229,12 @@ def save_game(bot, update, chat_data, user_data):
         i = 0
         while os.path.exists(fname):
             fname = "ignore/aborted_game_{}.p".format(i)
-            i += 1 # ensures multiple games can be saved
+            i += 1  # ensures multiple games can be saved
 
         game.save(fname)
         bot.send_message(chat_id=update.message.chat_id,
                          text="Saved game in current state as '{}'".format(fname))
+
 
 if __name__ == "__main__":
     restored_players = {}
@@ -235,7 +247,7 @@ if __name__ == "__main__":
 
     # Set up all command handlers
 
-    updater = Updater(token=API_KEY) # TODO init with bot=bot -> spooky errors?
+    updater = Updater(token=API_KEY)  # TODO init with bot=bot -> spooky errors?
     dispatcher = updater.dispatcher
 
     dispatcher.add_handler(get_static_handler("start"))
@@ -247,16 +259,17 @@ if __name__ == "__main__":
     dispatcher.add_handler(CommandHandler('cancelgame', cancelgame_handler, pass_chat_data=True))
     dispatcher.add_handler(CommandHandler('leave', leave_handler, pass_user_data=True))
 
-    dispatcher.add_handler(CommandHandler(secret_hitler.Game.ACCEPTED_COMMANDS + tuple(COMMAND_ALIASES.keys()), game_command_handler, pass_chat_data=True, pass_user_data=True))
+    dispatcher.add_handler(
+        CommandHandler(secret_hitler.Game.ACCEPTED_COMMANDS + tuple(COMMAND_ALIASES.keys()), game_command_handler,
+                       pass_chat_data=True, pass_user_data=True))
     dispatcher.add_handler(CommandHandler('savegame', save_game, pass_chat_data=True, pass_user_data=True))
-
 
     dispatcher.add_error_handler(handle_error)
 
     # allows viewing of exceptions
     logging.basicConfig(
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-        level=logging.INFO) # not sure exactly how this works
+        level=logging.INFO)  # not sure exactly how this works
 
     updater.start_polling()
     updater.idle()
