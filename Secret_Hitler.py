@@ -10,10 +10,10 @@ from telegram.error import Unauthorized, TelegramError
 # Fix for #14
 import sys, unicodedata, re
 all_unicode_chars = (unichr(i) for i in xrange(sys.maxunicode))
-non_printable_chars = ''.join(c for c in all_chars if unicodedata.category(c) == 'Cc')
-non_printable_regex = re.compile('[%s]' % re.escape(control_chars))
+non_printable_chars = ''.join(c for c in all_unicode_chars if unicodedata.category(c) == 'Cc')
+non_printable_regex = re.compile('[%s]' % re.escape(non_printable_chars))
 def strip_non_printable(s):
-    return control_char_re.sub('', s)
+    return non_printable_regex.sub('', s)
 # /Fix for #14
 
 markdown_regex = re.compile(".*((\[.*\]\(.*\))|\*|_|`).*")
