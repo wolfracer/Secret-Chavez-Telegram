@@ -178,7 +178,7 @@ class Game(object):
                 fascist_track[0] = "🔎"
             message = "— Fascist Track —\n" + " ".join(["✖️","✖️","✖️","✖️","✖️","✖️"][:self.fascist]+fascist_track[self.fascist-6:])
         elif to_show == "anarchy":
-            message = "— Anarchy Track —\n" + " ".join(["✖️","✖️","✖️"][:self.anarchy_progress]+["◻️","◻️","◻️"][self.anarchy_progress-3:])
+            message = "— Anarchy Track —\n" + " ".join(["✖️","✖️","✖️"][:self.anarchy_progress]+["◻️","◻️","◻️"][:3-self.anarchy_progress])
         elif to_show == "players":
             message = "— Presidential Order —\n" + " ➡️ ".join([player.name for player in self.players if player not in self.dead_players]) + " 🔁"
         elif to_show == "deck_stats":
