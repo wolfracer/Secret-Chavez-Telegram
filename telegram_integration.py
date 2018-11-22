@@ -49,6 +49,19 @@ def newgame_handler(bot, update, chat_data):
         chat_data["game_obj"] = Secret_Hitler.Game(chat_id)
         bot.send_message(chat_id=chat_id, text="Created game! /joingame to join, /startgame to start")
 
+def cancelgame_handler(bot, update, chat_data):
+    """
+    Cancel a game.
+    """
+    game = chat_data.get("game_obj")
+
+    chat_id = update.message.chat.id
+    if game is not None:
+        game.set_game_state(Secret_Hitler.GameStates.GAME_OVER)
+        raise GameOverException("Game cancelled. Type /newgame to start a new one.")
+    else:
+        bot.send_message(chat_id=chat_id, text="No game in progress here.")
+
 def leave_handler(bot, update, user_data):
     """
     Forces a user to leave their current game, regardless of game state (could
@@ -236,6 +249,7 @@ if __name__ == "__main__":
     dispatcher.add_handler(CommandHandler('feedback', feedback_handler, pass_args=True))
 
     dispatcher.add_handler(CommandHandler('newgame', newgame_handler, pass_chat_data=True))
+    dispatcher.add_handler(CommandHandler('cancelgame', cancelgame_handler, pass_chat_data=True))
     dispatcher.add_handler(CommandHandler(['leave', 'byebitch'], leave_handler, pass_user_data=True))
 
     dispatcher.add_handler(CommandHandler(Secret_Hitler.Game.ACCEPTED_COMMANDS + tuple(COMMAND_ALIASES.keys()), game_command_handler, pass_chat_data=True, pass_user_data=True))
