@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+
 
 import Secret_Hitler
 import telegram
@@ -71,7 +71,7 @@ def leave_handler(bot, update, user_data):
     player_id = update.message.from_user.id
     # edge case: first message after restore is /leave
     global restored_players
-    if player_id in restored_players.keys():
+    if player_id in list(restored_players.keys()):
         user_data["player_obj"] = restored_players[player_id]
         del restored_players[player_id]
 
@@ -112,7 +112,7 @@ def game_command_handler(bot, update, chat_data, user_data):
     Send outputs as replies via Telegram
     """
     command, args = parse_message(update.message.text)
-    if command in COMMAND_ALIASES.keys():
+    if command in list(COMMAND_ALIASES.keys()):
         command = COMMAND_ALIASES[command]
     player_id, chat_id = update.message.from_user.id, update.message.chat.id
 
@@ -122,15 +122,15 @@ def game_command_handler(bot, update, chat_data, user_data):
     if restored_game is not None and restored_game.global_chat == chat_id:
         chat_data["game_obj"] = restored_game
         restored_game = None
-    if player_id in restored_players.keys():
+    if player_id in list(restored_players.keys()):
         user_data["player_obj"] = restored_players[player_id]
         del restored_players[player_id]
 
     player = None
     game = None
-    if "player_obj" in user_data.keys():
+    if "player_obj" in list(user_data.keys()):
         player = user_data["player_obj"]
-    if "game_obj" in chat_data.keys():
+    if "game_obj" in list(chat_data.keys()):
         game = chat_data["game_obj"]
 
     # game = ((player is not None) and player.game) or chat_data["game_obj"]
@@ -207,9 +207,9 @@ def handle_error(bot, update, error):
 
 def save_game(bot, update, chat_data, user_data):
     game = None
-    if "game_obj" in chat_data.keys():
+    if "game_obj" in list(chat_data.keys()):
         game = chat_data["game_obj"]
-    elif "player_obj" in user_data.keys():
+    elif "player_obj" in list(user_data.keys()):
         game = user_data["player_obj"].game
 
     if game is not None:
