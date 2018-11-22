@@ -38,10 +38,6 @@ if not TESTING:
 
     # unnecessary in TESTING mode
 
-EVERYONE_HITLER = False
-EVERYONE_HITLER_EXPLANATION = \
-    "Hi, the game admins set the EVERYONE_HITLER flag, so you are not the only Hitler, so the game will keep going."
-
 
 class Player(object):
     """
@@ -245,36 +241,32 @@ class Game(object):
                 self.players[i].set_role(roles[i])
                 # NOTE: testing configuration does not "notify" fascists of night-phase info (if this breaks, it'll be apparent pretty quickly)
         else:
-            if EVERYONE_HITLER and self.num_players >= 7:
-                for p in self.players:
-                    p.set_role("Hitler")
+            if self.num_players == 5 or self.num_players == 6:  # 1F + H
+                fascists = random.sample(self.players, 2)
+            elif self.num_players == 7 or self.num_players == 8:  # 2F + H
+                fascists = random.sample(self.players, 3)
+            elif self.num_players == 9 or self.num_players == 10:  # 3F + H
+                fascists = random.sample(self.players, 4)
             else:
-                if self.num_players == 5 or self.num_players == 6:  # 1F + H
-                    fascists = random.sample(self.players, 2)
-                elif self.num_players == 7 or self.num_players == 8:  # 2F + H
-                    fascists = random.sample(self.players, 3)
-                elif self.num_players == 9 or self.num_players == 10:  # 3F + H
-                    fascists = random.sample(self.players, 4)
-                else:
-                    raise Exception("Invalid number of players")
+                raise Exception("Invalid number of players")
 
-                for p in self.players:
-                    if p == fascists[0]:
-                        p.set_role("Hitler")
-                        if self.num_players <= 6:
-                            p.send_message("Fascist: {}".format(fascists[1]))
-                    elif p in fascists:
-                        p.set_role("Fascist")
-                        if self.num_players <= 6:
-                            p.send_message("Hitler: {}".format(fascists[0]))
-                        else:
-                            p.send_message("Other Fascist{}: {}\nHitler: {}".format("s" if len(fascists) > 3 else "",
-                                                                                    ", ".join(
-                                                                                        [other_p.name for other_p in
-                                                                                         fascists[1:] if other_p != p]),
-                                                                                    fascists[0]))
+            for p in self.players:
+                if p == fascists[0]:
+                    p.set_role("Hitler")
+                    if self.num_players <= 6:
+                        p.send_message("Fascist: {}".format(fascists[1]))
+                elif p in fascists:
+                    p.set_role("Fascist")
+                    if self.num_players <= 6:
+                        p.send_message("Hitler: {}".format(fascists[0]))
                     else:
-                        p.set_role("Liberal")
+                        p.send_message("Other Fascist{}: {}\nHitler: {}".format("s" if len(fascists) > 3 else "",
+                                                                                ", ".join(
+                                                                                    [other_p.name for other_p in
+                                                                                     fascists[1:] if other_p != p]),
+                                                                                fascists[0]))
+                else:
+                    p.set_role("Liberal")
 
         self.record_data("ROLES:\n" + "\n".join(["{} - {}".format(p, p.role) for p in self.players]) + "\n\n",
                          spectator_only=True)
@@ -534,10 +526,7 @@ class Game(object):
         if election_result:
             if self.fascist >= 3:
                 if self.chancellor.role == "Hitler":
-                    if EVERYONE_HITLER:
-                        self.chancellor.send_message(EVERYONE_HITLER_EXPLANATION)
-                    else:
-                        self.end_game("Fascist", "Hitler was elected chancellor")
+                    self.end_game("Fascist", "Hitler was elected chancellor")
                 else:
                     self.confirmed_not_hitlers.add(self.chancellor)
 
@@ -775,10 +764,7 @@ class Game(object):
         """
         self.record_data(" - kills {}\n".format(target), spectator_only=False)
         if target.role == "Hitler":
-            if EVERYONE_HITLER:
-                target.send_message(EVERYONE_HITLER_EXPLANATION)
-            else:
-                self.end_game("Liberal", "Hitler was killed")
+            self.end_game("Liberal", "Hitler was killed")
         else:
             self.dead_players.add(target)
             self.num_alive_players -= 1
