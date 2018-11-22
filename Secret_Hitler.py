@@ -146,6 +146,8 @@ class Game(object):
         self.fascist = 0
         self.anarchy_progress = 0
 
+        self.status_message = None
+
         self.game_state = GameStates.ACCEPT_PLAYERS
 
     def reset_blame_ratelimit(self):
@@ -391,9 +393,11 @@ class Game(object):
         # If we're staging a new game, show updated staging info
         if self.game_state == GameStates.ACCEPT_PLAYERS:
             if self.num_players < 5:
-                leave_message += "\nYou need {} more players before you can start.".format(["5️⃣","4️⃣","3️⃣","2️⃣","1️⃣"][self.num_players],"" if self.num_players==4 else "s")
+                leave_message += "\nYou need {} more player{} before you can start.".format(["5️⃣","4️⃣","3️⃣","2️⃣","1️⃣"][self.num_players],"" if self.num_players==4 else "s")
+                self.status_message.edit_text("Waiting for {} more player{}".format(["5️⃣","4️⃣","3️⃣","2️⃣","1️⃣"][self.num_players],"" if self.num_players==4 else "s"))
             else:
                 leave_message += "\nType /startgame to start the game with {} players!".format(self.num_players)
+                self.status_message.edit_text("Start with {} players?".format(["0️⃣","1️⃣","2️⃣","3️⃣","4️⃣","5️⃣","6️⃣","7️⃣","8️⃣","9️⃣","🔟"][self.num_players]))
         self.global_message(leave_message)
 
     def select_chancellor(self, target):
@@ -904,9 +908,11 @@ class Game(object):
                 welcome_message = "Welcome, {}! Make sure to [message me directly](t.me/{}) before the game starts so I can send you secret information.".format(from_player.name, BOT_USERNAME)
                 # Show updated staging info
                 if self.num_players < 5:
-                    welcome_message += "\nYou need {} more players before you can start.".format(["5️⃣","4️⃣","3️⃣","2️⃣","1️⃣"][self.num_players],"" if self.num_players==4 else "s")
+                    welcome_message += "\nYou need {} more player{} before you can start.".format(["5️⃣","4️⃣","3️⃣","2️⃣","1️⃣"][self.num_players],"" if self.num_players==4 else "s")
+                    self.status_message.edit_text("Waiting for {} more player{}".format(["5️⃣","4️⃣","3️⃣","2️⃣","1️⃣"][self.num_players],"" if self.num_players==4 else "s"))
                 else:
                     welcome_message += "\nType /startgame to start the game with {} players!".format(self.num_players)
+                    self.status_message.edit_text("Start with {} players?".format(["0️⃣","1️⃣","2️⃣","3️⃣","4️⃣","5️⃣","6️⃣","7️⃣","8️⃣","9️⃣","🔟"][self.num_players]))
                 return welcome_message
             elif command == "startgame":
                 if self.num_players < 5:

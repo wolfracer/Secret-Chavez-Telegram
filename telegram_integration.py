@@ -46,8 +46,12 @@ def newgame_handler(bot, update, chat_data):
     else:
         if game is not None: # properly end that game
             game.set_game_state(Secret_Hitler.GameStates.GAME_OVER)
-        chat_data["game_obj"] = Secret_Hitler.Game(chat_id)
+        game = Secret_Hitler.Game(chat_id)
+        chat_data["game_obj"] = game
         bot.send_message(chat_id=chat_id, text="Created game! /joingame to join, /startgame to start")
+        game.status_message = bot.send_message(chat_id=chad_id, text="Waiting for 5️⃣ more players")
+        game.previous_pinned_message = update.message.chat.pinned_message
+        bot.pin_chat_message(chat_id=chat_id, message_id=game.status_message.id, disable_notification=True)
 
 def cancelgame_handler(bot, update, chat_data):
     """
