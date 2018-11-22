@@ -1,14 +1,16 @@
 # -*- coding: utf-8 -*-
 
-import random
 import pickle
+import random
+import re
+import sys
 import time
+import unicodedata
 from enum import Enum
+
 from telegram.error import Unauthorized, TelegramError
 
 # Fix for #14
-import sys, unicodedata, re
-
 all_unicode_chars = (chr(i) for i in range(sys.maxunicode))
 non_printable_chars = ''.join(c for c in all_unicode_chars if unicodedata.category(c) == 'Cc')
 non_printable_regex = re.compile('[%s]'%re.escape(non_printable_chars))
@@ -20,6 +22,7 @@ def strip_non_printable(s):
 
 # /Fix for #14
 
+
 markdown_regex = re.compile(".*((\[.*\]\(.*\))|\*|_|`).*")
 
 with open("config/username", "r") as f:
@@ -28,14 +31,14 @@ BLAME_RATELIMIT = 69  # seconds
 TESTING = (__name__ == "__main__")  # test whenever this file is run directly
 # set TESTING to True to simulate a game locally
 if not TESTING:
-    import bot_telegram
 
     telegram_errors = []
 
     # unnecessary in TESTING mode
 
 EVERYONE_HITLER = False
-EVERYONE_HITLER_EXPLANATION = "Hi, the game admins set the EVERYONE_HITLER flag, so you are not the only Hitler, so the game will keep going."
+EVERYONE_HITLER_EXPLANATION = \
+    "Hi, the game admins set the EVERYONE_HITLER flag, so you are not the only Hitler, so the game will keep going."
 
 
 class Player(object):
@@ -50,6 +53,7 @@ class Player(object):
         self.id = _id
         self.name = _name
         self.game = None
+        self.party = None
         self.role = None
 
     def __str__(self):
@@ -328,7 +332,7 @@ class Game(object):
         Helper function for getting a player from their index or name (which they could be referred to by).
         Returns None if player could not be identified.
         """
-        if player_str.isdigit() and int(player_str) > 0 and int(player_str) <= self.num_players:
+        if player_str.isdigit() and 0 < int(player_str) <= self.num_players:
             return self.players[int(player_str) - 1]
         else:
             for p in self.players:
@@ -711,7 +715,7 @@ class Game(object):
         Passes presidency to next player in the rotation or, if the previous election was a special election,
         resumes the normal rotation.
         """
-        if self.last_nonspecial_president == None:  # normal rotation
+        if self.last_nonspecial_president is None:  # normal rotation
             self.president = self.next_alive_player(self.president)
         else:  # returning from special election
             self.president = self.next_alive_player(self.last_nonspecial_president)
@@ -1032,7 +1036,7 @@ class Game(object):
                             target_confirmed = True
                             break
 
-            if target == None:
+            if target is None:
                 return "Error: Could not parse player."
             if command == "nominate":
                 if self.game_state == GameStates.CHANCY_NOMINATION:

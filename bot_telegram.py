@@ -1,19 +1,18 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import secret_hitler
-import telegram
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
-
-from telegram.error import TelegramError
 import logging
-
-import sys
 import os
-import time
+import sys
 
-with open("config/key", "r") as f:
-    API_KEY = f.read().rstrip()
+import telegram
+from telegram.error import TelegramError
+from telegram.ext import Updater, CommandHandler
+
+import secret_hitler
+
+with open("config/key", "r") as file:
+    API_KEY = file.read().rstrip()
 
 bot = telegram.Bot(token=API_KEY)
 
@@ -43,14 +42,14 @@ def newgame_handler(bot, update, chat_data):
     chat_id = update.message.chat.id
     if update.message.chat.type == "private":
         bot.send_message(chat_id=chat_id, text="You can’t create a game in a private chat!")
-    elif game is not None and game.game_state != Secret_Hitler.GameStates.GAME_OVER and update.message.text.find(
+    elif game is not None and game.game_state != secret_hitler.GameStates.GAME_OVER and update.message.text.find(
             "confirm") == -1:
         bot.send_message(chat_id=chat_id,
                          text="Warning: game already in progress here. Reply '/newgame confirm' to confirm")
     else:
         if game is not None:  # properly end that game
-            game.set_game_state(Secret_Hitler.GameStates.GAME_OVER)
-        chat_data["game_obj"] = Secret_Hitler.Game(chat_id)
+            game.set_game_state(secret_hitler.GameStates.GAME_OVER)
+        chat_data["game_obj"] = secret_hitler.Game(chat_id)
         bot.send_message(chat_id=chat_id, text="Created game! /joingame to join, /startgame to start")
 
 
@@ -62,7 +61,7 @@ def cancelgame_handler(bot, update, chat_data):
 
     chat_id = update.message.chat.id
     if game is not None:
-        game.set_game_state(Secret_Hitler.GameStates.GAME_OVER)
+        game.set_game_state(secret_hitler.GameStates.GAME_OVER)
         raise GameOverException("Game cancelled. Type /newgame to start a new one.")
     else:
         bot.send_message(chat_id=chat_id, text="No game in progress here.")
@@ -117,7 +116,7 @@ COMMAND_ALIASES = {"nom": "nominate", "blam": "blame", "dig": "investigate", "lo
 
 def game_command_handler(bot, update, chat_data, user_data):
     """
-    Pass all commands that Secret_Hitler.Game can handle to game's handle_message method
+    Pass all commands that secret_hitler.Game can handle to game's handle_message method
     Send outputs as replies via Telegram
     """
     command, args = parse_message(update.message.text)
@@ -151,10 +150,10 @@ def game_command_handler(bot, update, chat_data, user_data):
             return
         else:
             if args and (game.check_name(args) is None):  # args is a valid name
-                player = Secret_Hitler.Player(player_id, args)
+                player = secret_hitler.Player(player_id, args)
             else:
                 # TODO: maybe also chack their Telegram first name for validity
-                player = Secret_Hitler.Player(player_id, update.message.from_user.first_name)
+                player = secret_hitler.Player(player_id, update.message.from_user.first_name)
 
             user_data["player_obj"] = player
     else:
@@ -174,15 +173,15 @@ def game_command_handler(bot, update, chat_data, user_data):
 
         # pass all supressed errors (if any) directly to the handler in
         # the order that they occurred
-        while len(Secret_Hitler.telegram_errors) > 0:
-            handle_error(bot, update, Secret_Hitler.telegram_errors.pop(0))
+        while len(secret_hitler.telegram_errors) > 0:
+            handle_error(bot, update, secret_hitler.telegram_errors.pop(0))
         # TODO: it would be cleaner to just have a consumer thread handling
         # these errors as they occur
 
         if reply:  # reply is None if no response is necessary
             bot.send_message(chat_id=chat_id, text=reply, parse_mode=telegram.ParseMode.MARKDOWN)
 
-    except Secret_Hitler.GameOverException:
+    except secret_hitler.GameOverException:
         return
 
 
@@ -239,7 +238,7 @@ def save_game(bot, update, chat_data, user_data):
 if __name__ == "__main__":
     restored_players = {}
     if len(sys.argv) > 1:
-        restored_game = Secret_Hitler.Game.load(sys.argv[1])
+        restored_game = secret_hitler.Game.load(sys.argv[1])
         for p in restored_game.players:
             restored_players[p.id] = p
     else:
