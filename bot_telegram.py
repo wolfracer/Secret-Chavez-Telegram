@@ -17,6 +17,44 @@ with open("config/key", "r") as file:
 bot = telegram.Bot(token=API_KEY)
 
 
+def main():
+    restored_players = {}
+    if len(sys.argv) > 1:
+        restored_game = secret_hitler.Game.load(sys.argv[1])
+        for p in restored_game.players:
+            restored_players[p.id] = p
+    else:
+        restored_game = None
+
+    # Set up all command handlers
+
+    updater = Updater(token=API_KEY)  # TODO init with bot=bot -> spooky errors?
+    dispatcher = updater.dispatcher
+
+    dispatcher.add_handler(get_static_handler("start"))
+    dispatcher.add_handler(get_static_handler("help"))
+    dispatcher.add_handler(get_static_handler("changelog"))
+    dispatcher.add_handler(CommandHandler('feedback', feedback_handler, pass_args=True))
+
+    dispatcher.add_handler(CommandHandler('newgame', newgame_handler, pass_chat_data=True))
+    dispatcher.add_handler(CommandHandler('cancelgame', cancelgame_handler, pass_chat_data=True))
+    dispatcher.add_handler(CommandHandler('leave', leave_handler, pass_user_data=True))
+
+    dispatcher.add_handler(
+        CommandHandler(secret_hitler.Game.ACCEPTED_COMMANDS + tuple(COMMAND_ALIASES.keys()), game_command_handler,
+                       pass_chat_data=True, pass_user_data=True))
+    dispatcher.add_handler(CommandHandler('savegame', save_game, pass_chat_data=True, pass_user_data=True))
+
+    dispatcher.add_error_handler(handle_error)
+
+    # allows viewing of exceptions
+    logging.basicConfig(
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        level=logging.INFO)  # not sure exactly how this works
+
+    updater.start_polling()
+    updater.idle()
+
 def get_static_handler(command):
     """
     Given a string command, returns a CommandHandler for that string that
@@ -236,39 +274,4 @@ def save_game(bot, update, chat_data, user_data):
 
 
 if __name__ == "__main__":
-    restored_players = {}
-    if len(sys.argv) > 1:
-        restored_game = secret_hitler.Game.load(sys.argv[1])
-        for p in restored_game.players:
-            restored_players[p.id] = p
-    else:
-        restored_game = None
-
-    # Set up all command handlers
-
-    updater = Updater(token=API_KEY)  # TODO init with bot=bot -> spooky errors?
-    dispatcher = updater.dispatcher
-
-    dispatcher.add_handler(get_static_handler("start"))
-    dispatcher.add_handler(get_static_handler("help"))
-    dispatcher.add_handler(get_static_handler("changelog"))
-    dispatcher.add_handler(CommandHandler('feedback', feedback_handler, pass_args=True))
-
-    dispatcher.add_handler(CommandHandler('newgame', newgame_handler, pass_chat_data=True))
-    dispatcher.add_handler(CommandHandler('cancelgame', cancelgame_handler, pass_chat_data=True))
-    dispatcher.add_handler(CommandHandler('leave', leave_handler, pass_user_data=True))
-
-    dispatcher.add_handler(
-        CommandHandler(secret_hitler.Game.ACCEPTED_COMMANDS + tuple(COMMAND_ALIASES.keys()), game_command_handler,
-                       pass_chat_data=True, pass_user_data=True))
-    dispatcher.add_handler(CommandHandler('savegame', save_game, pass_chat_data=True, pass_user_data=True))
-
-    dispatcher.add_error_handler(handle_error)
-
-    # allows viewing of exceptions
-    logging.basicConfig(
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-        level=logging.INFO)  # not sure exactly how this works
-
-    updater.start_polling()
-    updater.idle()
+    main()
