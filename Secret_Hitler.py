@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+
 
 import random
 import pickle
@@ -9,7 +9,7 @@ from telegram.error import Unauthorized, TelegramError
 
 # Fix for #14
 import sys, unicodedata, re
-all_unicode_chars = (unichr(i) for i in xrange(sys.maxunicode))
+all_unicode_chars = (chr(i) for i in range(sys.maxunicode))
 non_printable_chars = ''.join(c for c in all_unicode_chars if unicodedata.category(c) == 'Cc')
 non_printable_regex = re.compile('[%s]' % re.escape(non_printable_chars))
 def strip_non_printable(s):
@@ -49,7 +49,7 @@ class Player(object):
 
     def send_message(self, msg, supress_errors=True):
         if TESTING:
-            print "[ Message for {} ]\n{}".format(self, msg)
+            print("[ Message for {} ]\n{}".format(self, msg))
         else:
             try:
                 telegram_integration.bot.send_message(chat_id=self.id, text=msg)
@@ -255,7 +255,7 @@ class Game(object):
         Send a message to all players using the chat specified in the constructor.
         """
         if TESTING:
-            print "[ Message for everyone ]\n{}".format(msg)
+            print("[ Message for everyone ]\n{}".format(msg))
         else:
             try:
                 telegram_integration.bot.send_message(chat_id=self.global_chat, text=msg)
@@ -1056,9 +1056,9 @@ class Game(object):
         the input and output for debugging
         """
         response = self.handle_message(player, command, args)
-        print "[{}] {} {}".format(player, command, args)
+        print("[{}] {} {}".format(player, command, args))
         if response:
-            print "[Reply to {}] {}".format(player, response)
+            print("[Reply to {}] {}".format(player, response))
     def TEST_vote(self, should_pass=True):
         """
         TESTING FUNCTION: use TEST_handle to simulate a unanimous "ja" (or unanimous "nein" if should_pass=False)
