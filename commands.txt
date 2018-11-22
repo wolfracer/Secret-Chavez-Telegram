@@ -1,0 +1,10 @@
+boardstats - Stats on the board
+deckstats - Stats on the deck
+logs - Show the game logs
+ja - JA!
+nein - NEIN!
+listplayers - List the players
+newgame - Init new game
+joingame - Join game
+startgame - Start game
+cancelgame - Cancel game
