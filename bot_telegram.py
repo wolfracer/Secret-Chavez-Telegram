@@ -1,5 +1,5 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
 
 import secret_hitler
 import telegram
@@ -11,6 +11,7 @@ import logging
 import sys
 import os
 import time
+
 
 with open("config/key", "r") as f:
     API_KEY = f.read().rstrip()

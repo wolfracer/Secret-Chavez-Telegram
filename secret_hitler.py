@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
-
 import random
 import pickle
 import time
 from enum import Enum
 from telegram.error import Unauthorized, TelegramError
+
 
 # Fix for #14
 import sys, unicodedata, re
