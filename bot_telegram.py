@@ -55,6 +55,7 @@ def main():
     updater.start_polling()
     updater.idle()
 
+
 def get_static_handler(command):
     """
     Given a string command, returns a CommandHandler for that string that
