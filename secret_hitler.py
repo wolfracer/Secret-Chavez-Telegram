@@ -10,6 +10,8 @@ from enum import Enum
 
 from telegram.error import Unauthorized, TelegramError
 
+import bot_telegram
+
 # Fix for #14
 all_unicode_chars = (chr(i) for i in range(sys.maxunicode))
 non_printable_chars = ''.join(c for c in all_unicode_chars if unicodedata.category(c) == 'Cc')
@@ -64,7 +66,7 @@ class Player(object):
             print("[ Message for {} ]\n{}".format(self, msg))
         else:
             try:
-                telegram_integration.bot.send_message(chat_id=self.id, text=msg)
+                bot_telegram.bot.send_message(chat_id=self.id, text=msg)
             except TelegramError as e:
                 if supress_errors:
                     telegram_errors.append(e)
@@ -288,7 +290,7 @@ class Game(object):
             print("[ Message for everyone ]\n{}".format(msg))
         else:
             try:
-                telegram_integration.bot.send_message(chat_id=self.global_chat, text=msg)
+                bot_telegram.bot.send_message(chat_id=self.global_chat, text=msg)
             except TelegramError as e:
                 if supress_errors:
                     telegram_errors.append(e)
