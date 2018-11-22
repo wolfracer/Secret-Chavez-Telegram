@@ -23,7 +23,7 @@ BLAME_RATELIMIT = 69 # seconds
 TESTING = (__name__ == "__main__") # test whenever this file is run directly
 # set TESTING to True to simulate a game locally
 if not TESTING:
-    import telegram_integration
+    import bot_telegram
     telegram_errors = [ ]
 
     # unnecessary in TESTING mode

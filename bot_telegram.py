@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 
-import Secret_Hitler
+import secret_hitler
 import telegram
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 
@@ -12,7 +12,7 @@ import sys
 import os
 import time
 
-with open("ignore/API_key.txt", "r") as f:
+with open("config/key", "r") as f:
     API_KEY = f.read().rstrip()
 
 bot = telegram.Bot(token=API_KEY)
@@ -246,7 +246,7 @@ if __name__ == "__main__":
     dispatcher.add_handler(CommandHandler('cancelgame', cancelgame_handler, pass_chat_data=True))
     dispatcher.add_handler(CommandHandler('leave', leave_handler, pass_user_data=True))
 
-    dispatcher.add_handler(CommandHandler(Secret_Hitler.Game.ACCEPTED_COMMANDS + tuple(COMMAND_ALIASES.keys()), game_command_handler, pass_chat_data=True, pass_user_data=True))
+    dispatcher.add_handler(CommandHandler(secret_hitler.Game.ACCEPTED_COMMANDS + tuple(COMMAND_ALIASES.keys()), game_command_handler, pass_chat_data=True, pass_user_data=True))
     dispatcher.add_handler(CommandHandler('savegame', save_game, pass_chat_data=True, pass_user_data=True))
 
 
