@@ -15,6 +15,8 @@ with open("config/key", "r") as file:
     API_KEY = file.read().rstrip()
 
 bot = telegram.Bot(token=API_KEY)
+restored_players = {}
+restored_game = {}
 
 
 def main():
