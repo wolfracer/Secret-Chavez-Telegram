@@ -20,7 +20,9 @@ restored_game = {}
 
 
 def main():
-    restored_players = {}
+    global restored_players
+    global restored_game
+
     if len(sys.argv) > 1:
         restored_game = secret_hitler.Game.load(sys.argv[1])
         for p in restored_game.players:
