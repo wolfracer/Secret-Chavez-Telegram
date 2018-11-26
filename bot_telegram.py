@@ -4,6 +4,7 @@
 import logging
 import os
 import sys
+from subprocess import call
 
 import telegram
 from telegram.error import TelegramError
@@ -13,6 +14,9 @@ import secret_hitler
 
 with open("config/key", "r") as file:
     API_KEY = file.read().rstrip()
+
+with open("config/devchat", "r") as file:
+    DEV_CHAT_ID = file.read().rstrip()
 
 bot = telegram.Bot(token=API_KEY)
 restored_players = {}
@@ -43,6 +47,7 @@ def main():
     dispatcher.add_handler(CommandHandler('newgame', newgame_handler, pass_chat_data=True))
     dispatcher.add_handler(CommandHandler('cancelgame', cancelgame_handler, pass_chat_data=True))
     dispatcher.add_handler(CommandHandler('leave', leave_handler, pass_user_data=True))
+    dispatcher.add_handler(CommandHandler('restart', restart_handler))
 
     dispatcher.add_handler(
         CommandHandler(secret_hitler.Game.ACCEPTED_COMMANDS + tuple(COMMAND_ALIASES.keys()), game_command_handler,
@@ -135,6 +140,18 @@ def leave_handler(bot, update, user_data):
         bot.send_message(chat_id=update.message.chat.id, text=reply)
     else:
         player.send_message(reply)
+
+
+def restart_handler(bot, update):
+    """
+    Pulls newest code and ends the bot, so that the system daemon can restart it.
+    """
+    user_id, chat_id = update.message.from_user.id, update.message.chat.id
+    user = bot.get_chat_member(chat_id, user_id)
+
+    if chat_id == DEV_CHAT_ID and user in bot.get_chat_administrators(chat_id):
+        call(["git" "pull"])
+        sys.exit(0)
 
 
 def parse_message(msg):
