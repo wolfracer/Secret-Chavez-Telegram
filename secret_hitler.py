@@ -438,7 +438,7 @@ class Game(object):
             self.global_message("President {} has nominated Chancellor {}.".format(self.president, self.chancellor))
             # self.global_message("Now voting on {}/{}".format(self.president, self.chancellor))
             self.set_game_state(GameStates.ELECTION)
-            self.record_data("{}/{} ".format(self.president, self.chancellor), spectator_only=False)
+            self.record_data("{} / {} ".format(self.president, self.chancellor), spectator_only=False)
 
             return True
 
@@ -814,7 +814,7 @@ class Game(object):
                 "Election: Vote on President {} and Chancellor {}".format(self.president, self.chancellor))
             for p in self.players:  # send individual messages to clarify who you're voting on
                 if p not in self.dead_players:
-                    p.send_message("{}/{} vote (\"/ja\" or \"/nein\"):".format(self.president, self.chancellor))
+                    p.send_message("{} / {} vote (\/ja\" or \"/nein\"):".format(self.president, self.chancellor))
         elif self.game_state == GameStates.LEG_PRES:
             self.global_message("Legislative session in progress (waiting on President {})".format(self.president))
             self.president.send_message("Pick a policy to discard!\n(\"/discard [POLICY]\")")
