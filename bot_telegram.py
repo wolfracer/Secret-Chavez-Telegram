@@ -101,7 +101,7 @@ def cancelgame_handler(bot, update, chat_data):
     chat_id = update.message.chat.id
     if game is not None:
         game.set_game_state(secret_hitler.GameStates.GAME_OVER)
-        raise GameOverException("Game cancelled. Type /newgame to start a new one.")
+        raise secret_hitler.GameOverException("Game cancelled. Type /newgame to start a new one.")
     else:
         bot.send_message(chat_id=chat_id, text="No game in progress here.")
 
