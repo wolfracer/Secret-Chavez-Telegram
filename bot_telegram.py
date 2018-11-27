@@ -150,7 +150,7 @@ def restart_handler(bot, update):
     user_id, chat_id = update.message.from_user.id, update.message.chat.id
     user = bot.get_chat_member(chat_id, user_id)
     admins = bot.get_chat_administrators(chat_id)
-    logging.debug("user_id: %s\nchat_id: %s\nadmins: %s", user_id, chat_id, admins)
+    logging.debug("user_id: %s\nchat_id: %s\nadmins: %s", user_id, chat_id, admins[0].user.id)
 
     if chat_id == DEV_CHAT_ID and user in admins:
         if call(["git", "pull"]) != 0:
