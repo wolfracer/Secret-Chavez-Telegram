@@ -146,12 +146,16 @@ def restart_handler(bot, update):
     """
     Pulls newest code and ends the bot, so that the system daemon can restart it.
     """
+    logging.info("Restarting bot.")
     user_id, chat_id = update.message.from_user.id, update.message.chat.id
     user = bot.get_chat_member(chat_id, user_id)
+    admins = bot.get_chat_administrators(chat_id)
+    logging.debug("user_id: %s\nchat_id: %s\nadmins: %s", user_id, chat_id, admins)
 
-    if chat_id == DEV_CHAT_ID and user in bot.get_chat_administrators(chat_id):
-        call(["git" "pull"])
-        sys.exit(0)
+    if chat_id == DEV_CHAT_ID and user in admins:
+        if call(["git", "pull"]) != 0:
+            logging.error("git pull failed")
+        sys.exit(0)  # Exit with success code so the bot is restarted
 
 
 def parse_message(msg):
