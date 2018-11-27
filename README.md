@@ -5,7 +5,7 @@ A Telegram bot that allows users to play Secret Hitler.
 
 ## Special Commands
 
-See [command_list.txt](command_list.txt) for a list of available commands and descriptions.  Note that some commands are only available to certain players in certain game states.
+See [commands.txt](commands.txt) for a list of available commands and descriptions.  Note that some commands are only available to certain players in certain game states.
 
 ## Player status abbreviations
 * (P) indicates a current president/presidential candidate
