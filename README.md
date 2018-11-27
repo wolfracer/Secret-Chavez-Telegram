@@ -15,7 +15,7 @@ See [commands.txt](commands.txt) for a list of available commands and descriptio
 
 ## API Key
 
-The api key is stored in API_key.txt but withheld with .gitignore. To replicate this project, make a Telegram bot by messaging \@BotFather and pasting the resulting API key there.
+The api key is stored in `config/key` but withheld with `.gitignore`. To replicate this project, make a Telegram bot by messaging \@BotFather and pasting the resulting API key there.
 
 ## License/Attribution
 
