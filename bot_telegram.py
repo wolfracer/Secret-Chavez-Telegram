@@ -59,7 +59,7 @@ def main():
     # allows viewing of exceptions
     logging.basicConfig(
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-        level=logging.INFO)  # not sure exactly how this works
+        level=logging.DEBUG)  # not sure exactly how this works
 
     updater.start_polling()
     updater.idle()
