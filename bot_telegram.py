@@ -4,6 +4,7 @@
 import logging
 import os
 import sys
+import threading
 from subprocess import call
 
 import telegram
@@ -16,9 +17,10 @@ with open("config/key", "r") as file:
     API_KEY = file.read().rstrip()
 
 with open("config/devchat", "r") as file:
-    DEV_CHAT_ID = file.read().rstrip()
+    DEV_CHAT_ID = int(file.read().rstrip())
 
 bot = telegram.Bot(token=API_KEY)
+updater = Updater(token=API_KEY)
 restored_players = {}
 restored_game = {}
 
@@ -26,6 +28,7 @@ restored_game = {}
 def main():
     global restored_players
     global restored_game
+    global updater
 
     if len(sys.argv) > 1:
         restored_game = secret_hitler.Game.load(sys.argv[1])
@@ -36,7 +39,6 @@ def main():
 
     # Set up all command handlers
 
-    updater = Updater(token=API_KEY)  # TODO init with bot=bot -> spooky errors?
     dispatcher = updater.dispatcher
 
     dispatcher.add_handler(get_static_handler("start"))
@@ -61,8 +63,19 @@ def main():
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
         level=logging.DEBUG)  # not sure exactly how this works
 
+    start_bot()
+
+
+def start_bot():
+    global updater
     updater.start_polling()
     updater.idle()
+
+
+def stop_bot():
+    global updater
+    updater.stop()
+    updater.is_idle = False
 
 
 def get_static_handler(command):
@@ -147,15 +160,26 @@ def restart_handler(bot, update):
     Pulls newest code and ends the bot, so that the system daemon can restart it.
     """
     logging.info("Restarting bot.")
-    user_id, chat_id = update.message.from_user.id, update.message.chat.id
-    user = bot.get_chat_member(chat_id, user_id)
-    admins = bot.get_chat_administrators(chat_id)
-    logging.debug("user_id: %s\nchat_id: %s\nadmins: %s", user_id, chat_id, map(user, admins[0]))
 
-    if chat_id == DEV_CHAT_ID and user in admins:
+    user_id = update.message.from_user.id
+    chat_id = update.message.chat.id
+    admins = bot.get_chat_administrators(chat_id)
+    admin_ids = [i.user.id for i in admins]
+
+    logging.debug("Restart issued by: user_id: %s in chat_id: %s, group admins: %s", user_id, chat_id, admin_ids)
+
+    if chat_id == DEV_CHAT_ID and user_id in admin_ids:
         if call(["git", "pull"]) != 0:
             logging.error("git pull failed")
-        sys.exit(0)  # Exit with success code so the bot is restarted
+            bot.send_message(chat_id=chat_id, text="Failed pulling newest bot version. Shutting down anyway.")
+        else:
+            logging.info("git pull successful")
+            bot.send_message(chat_id=chat_id, text="Pulled newest bot version. Shutting down.")
+        # For reasons™ the stop function needs to be called in a new thread.
+        # (https://github.com/python-telegram-bot/python-telegram-bot/issues/801#issuecomment-323778248)
+        threading.Thread(target=stop_bot).start()
+    else:
+        logging.warning("Restart command issued in unauthorized group or by non-admin user. Not reacting.")
 
 
 def parse_message(msg):
