@@ -861,7 +861,7 @@ class Game(object):
         elif self.game_state == GameStates.EXECUTION:
             self.global_message("President ({}) must kill someone".format(self.president))
             self.president.send_message(
-                "Pick someone to kill!,
+                "Pick someone to kill!",
                 reply_markup=telegram.InlineKeyboardMarkup([[InlineKeyboardButton(candidate, callback_data="/nominate {}".format(candidate))]
                     for candidate in game.players if candidate not in game.dead_players]))
         elif self.game_state == GameStates.GAME_OVER:
