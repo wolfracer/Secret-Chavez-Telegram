@@ -199,7 +199,7 @@ def parse_message(msg):
     return command, args
 
 
-COMMAND_ALIASES = {"nom": "nominate", "blam": "blame", "dig": "investigate", "log": "logs"}
+COMMAND_ALIASES = {"nom": "nominate", "blam": "blame", "dig": "investigate", "log": "logs", "stats": "logs"}
 
 
 def game_command_handler(bot, update, chat_data, user_data):
