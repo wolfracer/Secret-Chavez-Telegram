@@ -813,7 +813,7 @@ class Game(object):
         if self.game_state == GameStates.CHANCY_NOMINATION:
             self.global_message("President {} must nominate a chancellor".format(self.president))
             self.president.send_message("Pick your chancellor!",
-                reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(candidate, callback_data="/nominate {}".format(candidate))]
+                reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(candidate.name, callback_data="/nominate {}".format(candidate.name))]
                     for candidate in self.players if
                     candidate not in self.termlimited_players and
                     candidate not in self.dead_players
@@ -849,20 +849,20 @@ class Game(object):
         elif self.game_state == GameStates.INVESTIGATION:
             self.global_message("President ({}) must investigate another player".format(self.president))
             self.president.send_message("Pick a player to investigate!",
-                reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(candidate, callback_data="/investigate {}".format(candidate))]
+                reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(candidate.name, callback_data="/investigate {}".format(candidate.name))]
                     for candidate in self.players if candidate not in self.dead_players]))
         elif self.game_state == GameStates.SPECIAL_ELECTION:
             self.global_message(
                 "Special Election: President ({}) must choose the next presidential candidate".format(self.president))
             self.president.send_message(
                 "Pick the next presidential candidate!",
-                reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(candidate, callback_data="/nominate {}".format(candidate))]
+                reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(candidate.name, callback_data="/nominate {}".format(candidate.name))]
                     for candidate in self.players if candidate not in self.dead_players and candidate != self.president]))
         elif self.game_state == GameStates.EXECUTION:
             self.global_message("President ({}) must kill someone".format(self.president))
             self.president.send_message(
                 "Pick someone to kill!",
-                reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(candidate, callback_data="/nominate {}".format(candidate))]
+                reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(candidate.name, callback_data="/nominate {}".format(candidate.name))]
                     for candidate in self.players if candidate not in self.dead_players]))
         elif self.game_state == GameStates.GAME_OVER:
             # self.global_message("\n".join(["{} - {}".format(p, p.role) for p in self.players]))
