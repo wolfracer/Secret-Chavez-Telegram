@@ -117,7 +117,7 @@ def newgame_handler(bot, update, chat_data):
         bot.send_message(chat_id=chat_id, text="Created game! /joingame to join, /startgame to start")
         existing_games[chat_id] = chat_data["game_obj"]
         for waiting_player in waiting_players_per_group[chat_id]:
-            bot.send_message(chat_id=waiting_player, text="A new game is starting in [{}]({}})!".format(update.message.chat.title, bot.get_chat(chat_id=chat_id).invite_link), parse_mode=telegram.ParseMode.MARKDOWN)
+            bot.send_message(chat_id=waiting_player, text="A new game is starting in [{}]({})!".format(update.message.chat.title, bot.get_chat(chat_id=chat_id).invite_link), parse_mode=telegram.ParseMode.MARKDOWN)
         del waiting_players_per_group[chat_id]
 
 
@@ -155,7 +155,7 @@ def cancelgame_handler(bot, update, chat_data):
 
 def joingame_handler(bot, update, chat_data, user_data):
     if waiting_players_per_group[update.message.chat.id] is not None:
-        waiting_players_per_group[update.message.cnhat.id].remove(update.message.from_user.id)
+        waiting_players_per_group[update.message.chat.id].remove(update.message.from_user.id)
     game_command_handler(bot, update, chat_data, user_data)
 
 def leave_handler(bot, update, user_data):
