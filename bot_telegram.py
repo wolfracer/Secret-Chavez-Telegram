@@ -204,7 +204,7 @@ def restart_handler(bot, update):
     if chat_id == DEV_CHAT_ID and user_id in admin_ids:
         if len([game for game in existing_games if existing_games[game].game_state!=secret_hitler.GameStates.GAME_OVER])>0 and update.message.text.find('confirm')==-1:
             bot.send_message(chat_id=chat_id, text="{} running game(s) found. Type `/restart confirm` to cancel those games and restart anyway.".format(len(existing_games)))
-        for game_chat_id in [game for game in existing_games if existing_games[game].game.game_state!=secret_hitler.GameStates.GAME_OVER]:
+        for game_chat_id in [game for game in existing_games if existing_games[game].game_state!=secret_hitler.GameStates.GAME_OVER]:
             existing_games[game_chat_id].set_game_state(secret_hitler.GameStates.GAME_OVER)
             bot.send_message(chat_id=game_chat_id, text="This game has been cancelled. Don’t be sad! Bugfixes and cool new features are coming!")
         # No need to clear the existing_games dict as the bot is shutting down anyway
