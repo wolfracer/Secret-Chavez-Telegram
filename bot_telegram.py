@@ -127,7 +127,7 @@ def nextgame_handler(bot, update, chat_data):
     if update.message.chat.type == "private":
         bot.send_message(chat_id=chat_id, text="You can’t wait for new games in private chat!")
     if game is not None and game.game_state == secret_hitler.GameStates.ACCEPT_PLAYERS and game.num_players<10 and update.message.text.find("confirm")==-1:
-        bot.send_message(chat_id=chat_id, text="You could still join the current game via /joingame. Type '/nextgame confirm' if you really want to wait.")
+        bot.send_message(chat_id=chat_id, text="You could still join the _current_ game via /joingame. Type '/nextgame confirm' if you really want to wait.")
     else:
         if chat_id not in waiting_players_per_group:
             waiting_players_per_group[chat_id]=[]
