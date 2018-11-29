@@ -23,6 +23,7 @@ bot = telegram.Bot(token=API_KEY)
 updater = Updater(token=API_KEY)
 restored_players = {}
 restored_game = {}
+existing_games = {}
 
 
 def main():
@@ -112,6 +113,7 @@ def newgame_handler(bot, update, chat_data):
             game.set_game_state(secret_hitler.GameStates.GAME_OVER)
         chat_data["game_obj"] = secret_hitler.Game(chat_id)
         bot.send_message(chat_id=chat_id, text="Created game! /joingame to join, /startgame to start")
+        existing_games[chat_id] = chat_data["game_obj"]
 
 
 def cancelgame_handler(bot, update, chat_data):
@@ -123,6 +125,7 @@ def cancelgame_handler(bot, update, chat_data):
     chat_id = update.message.chat.id
     if game is not None:
         game.set_game_state(secret_hitler.GameStates.GAME_OVER)
+        del existing_games[chat_id]
         raise secret_hitler.GameOverException("Game cancelled. Type /newgame to start a new one.")
     else:
         bot.send_message(chat_id=chat_id, text="No game in progress here.")
@@ -169,6 +172,12 @@ def restart_handler(bot, update):
     logging.debug("Restart issued by: user_id: %s in chat_id: %s, group admins: %s", user_id, chat_id, admin_ids)
 
     if chat_id == DEV_CHAT_ID and user_id in admin_ids:
+        if len([game for game in existing_games if game.game_state!=secret_hitler.GameStates.GAME_OVER])>0 and update.message.find('confirm')==-1:
+            bot.send_message(chat_id=chat_id, text="{} running game(s) found. Type `/restart confirm` to cancel those games and restart anyway.".format(len(existing_games)))
+        for game_chat_id in [game for game in existing_games if game.game_state!=secret_hitler.GameStates.GAME_OVER]:
+            existing_games[game_chat_id].set_game_state(secret_hitler.GameStates.GAME_OVER)
+            bot.send_message(chat_id=game_chat_id, text="This game has been cancelled. Don’t be sad! Bugfixes and cool new features are coming!")
+        # No need to clear the existing_games dict as the bot is shutting down anyway
         if call(["git", "pull"]) != 0:
             logging.error("git pull failed")
             bot.send_message(chat_id=chat_id, text="Failed pulling newest bot version. Shutting down anyway.")
