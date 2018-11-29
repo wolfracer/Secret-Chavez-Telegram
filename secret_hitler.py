@@ -889,7 +889,7 @@ class Game(object):
                 return p
         return None
 
-    ACCEPTED_COMMANDS = ("listplayers", "changename", "joingame", "startgame",
+    ACCEPTED_COMMANDS = ("listplayers", "changename", "startgame",
                          "boardstats", "deckstats", "anarchystats", "blame", "ja", "nein",
                          "nominate", "kill", "investigate", "enact", "discard", "whois",
                          "spectate", "unspectate", "logs")

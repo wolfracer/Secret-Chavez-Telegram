@@ -52,7 +52,7 @@ def main():
     dispatcher.add_handler(CommandHandler('leave', leave_handler, pass_user_data=True))
     dispatcher.add_handler(CommandHandler('restart', restart_handler))
     dispatcher.add_handler(CommandHandler('nextgame', nextgame_handler))
-
+    dispatcher.add_handler(CommandHandler('joingame', joingame_handler, pass_chat_data=True, pass_user_data=True))
     dispatcher.add_handler(
         CommandHandler(secret_hitler.Game.ACCEPTED_COMMANDS + tuple(COMMAND_ALIASES.keys()), game_command_handler,
                        pass_chat_data=True, pass_user_data=True))
@@ -118,6 +118,7 @@ def newgame_handler(bot, update, chat_data):
             bot.send_message(chat_id=waiting_player, text="A new game is starting in [{}](t.me/{})!".format(update.message.chat.title, chat_id))
         del waiting_players_per_group[chat_id]
 
+
 def nextgame_handler(bot, update, chat_data):
     """
     Add the issuing player to the current group’s waiting list if there is a game in progress.
@@ -148,6 +149,11 @@ def cancelgame_handler(bot, update, chat_data):
     else:
         bot.send_message(chat_id=chat_id, text="No game in progress here.")
 
+
+def joingame_handler(bot, update, chat_data, user_data):
+    if waiting_players_per_group[update.message.chat.id] is not None:
+        waiting_players_per_group[update.message.cnhat.id].remove(update.message.from_user.id)
+    game_command_handler(bot, update, chat_data, user_data)
 
 def leave_handler(bot, update, user_data):
     """
