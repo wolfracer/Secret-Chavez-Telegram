@@ -9,6 +9,7 @@ import unicodedata
 from enum import Enum
 
 from telegram.error import Unauthorized, TelegramError
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
 import bot_telegram
 
