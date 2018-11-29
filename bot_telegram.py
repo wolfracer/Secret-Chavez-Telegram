@@ -167,9 +167,12 @@ def leave_handler(bot, update, user_data):
     if player is None or player.game is None:
         reply = "No game to leave!"
     else:
+        game = player.game
         player.leave_game(confirmed=True)
         reply = "Successfully left game!"
-
+        if game is not None and game.game_state==secret_hitler.GameStates.ACCEPT_PLAYERS and game.num_players==9:
+            for waiting_player in waiting_players_per_group[game.global_chat]:
+                bot.send_message(chat_id=waiting_player, text="A slot just opened up in [{}](t.me/{})!".format(bot.get_chat(chat_id=game.global_chat).title, game.global_chat))
     if player is None:
         bot.send_message(chat_id=update.message.chat.id, text=reply)
     else:
