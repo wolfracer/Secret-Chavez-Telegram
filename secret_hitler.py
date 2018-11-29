@@ -1046,8 +1046,8 @@ class Game(object):
                     return
                 else:
                     self.kill(target)
-                    self.advance_presidency()
                     self.global_message("{} has killed {}.".format(from_player, target))
+                    self.advance_presidency()
                     target.send_message("You are now dead. RIP. Remember " + \
                                         "that dead players SHOULD NOT TALK, reveal their " + \
                                         "secret role, or otherwise influence the game!")
