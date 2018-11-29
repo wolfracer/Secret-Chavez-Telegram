@@ -73,6 +73,7 @@ def start_bot():
     global updater
     updater.start_polling()
     updater.idle()
+    bot.send_message(chat_id=DEV_CHAT_ID, text="Bot restarted successfully!")
 
 
 def stop_bot():
