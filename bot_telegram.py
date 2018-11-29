@@ -117,7 +117,7 @@ def newgame_handler(bot, update, chat_data):
         bot.send_message(chat_id=chat_id, text="Created game! /joingame to join, /startgame to start")
         existing_games[chat_id] = chat_data["game_obj"]
         for waiting_player in waiting_players_per_group[chat_id]:
-            bot.send_message(chat_id=waiting_player, text="A new game is starting in [{}](t.me/user?id={})!".format(update.message.chat.title, chat_id), parse_mode=telegram.ParseMode.MARKDOWN)
+            bot.send_message(chat_id=waiting_player, text="A new game is starting in [{}](tg://user?id={})!".format(update.message.chat.title, chat_id), parse_mode=telegram.ParseMode.MARKDOWN)
         del waiting_players_per_group[chat_id]
 
 
@@ -135,7 +135,7 @@ def nextgame_handler(bot, update, chat_data):
         if chat_id not in waiting_players_per_group:
             waiting_players_per_group[chat_id]=[]
         waiting_players_per_group[chat_id].append(update.message.from_user.id)
-        bot.send_message(chat_id=update.message.from_user.id, text="I will notify you when a new game starts in [{}](t.me/user?id={})".format(update.message.chat.title, chat_id), parse_mode=telegram.ParseMode.MARKDOWN)
+        bot.send_message(chat_id=update.message.from_user.id, text="I will notify you when a new game starts in [{}](tg://user?id={})".format(update.message.chat.title, chat_id), parse_mode=telegram.ParseMode.MARKDOWN)
 
 
 def cancelgame_handler(bot, update, chat_data):
@@ -181,7 +181,7 @@ def leave_handler(bot, update, user_data):
         reply = "Successfully left game!"
         if game is not None and game.game_state==secret_hitler.GameStates.ACCEPT_PLAYERS and game.num_players==9:
             for waiting_player in waiting_players_per_group[game.global_chat]:
-                bot.send_message(chat_id=waiting_player, text="A slot just opened up in [{}](t.me/user?id={})!".format(bot.get_chat(chat_id=game.global_chat).title, game.global_chat), parse_mode=telegram.ParseMode.MARKDOWN)
+                bot.send_message(chat_id=waiting_player, text="A slot just opened up in [{}](tg://user?id={})!".format(bot.get_chat(chat_id=game.global_chat).title, game.global_chat), parse_mode=telegram.ParseMode.MARKDOWN)
     if player is None:
         bot.send_message(chat_id=update.message.chat.id, text=reply)
     else:
