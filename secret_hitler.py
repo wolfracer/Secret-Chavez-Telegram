@@ -58,12 +58,12 @@ class Player(object):
     def __str__(self):
         return self.name
 
-    def send_message(self, msg, supress_errors=True):
+    def send_message(self, msg, supress_errors=True, reply_markup=None):
         if TESTING:
             print("[ Message for {} ]\n{}".format(self, msg))
         else:
             try:
-                bot_telegram.bot.send_message(chat_id=self.id, text=msg)
+                bot_telegram.bot.send_message(chat_id=self.id, text=msg, reply_markup=reply_markup)
             except TelegramError as e:
                 if supress_errors:
                     telegram_errors.append(e)
@@ -275,7 +275,7 @@ class Game(object):
         self.president = self.players[0]
         self.set_game_state(GameStates.CHANCY_NOMINATION)
 
-    def global_message(self, msg, supress_errors=True):
+    def global_message(self, msg, supress_errors=True, reply_markup=None):
         """
         Send a message to all players using the chat specified in the constructor.
         """
@@ -283,7 +283,7 @@ class Game(object):
             print("[ Message for everyone ]\n{}".format(msg))
         else:
             try:
-                bot_telegram.bot.send_message(chat_id=self.global_chat, text=msg)
+                bot_telegram.bot.send_message(chat_id=self.global_chat, text=msg, reply_markup=reply_markup)
             except TelegramError as e:
                 if supress_errors:
                     telegram_errors.append(e)
