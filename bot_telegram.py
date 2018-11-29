@@ -116,9 +116,9 @@ def newgame_handler(bot, update, chat_data):
         chat_data["game_obj"] = secret_hitler.Game(chat_id)
         bot.send_message(chat_id=chat_id, text="Created game! /joingame to join, /startgame to start")
         existing_games[chat_id] = chat_data["game_obj"]
-        for waiting_player in waiting_players_per_group[chat_id]:
+        for waiting_player in waiting_players_per_group["{}".format(chat_id)]:
             bot.send_message(chat_id=waiting_player, text="A new game is starting in [{}]({})!".format(update.message.chat.title, bot.get_chat(chat_id=chat_id).invite_link), parse_mode=telegram.ParseMode.MARKDOWN)
-        del waiting_players_per_group[chat_id]
+        del waiting_players_per_group["{}".format(chat_id)]
 
 
 def nextgame_handler(bot, update, chat_data):
@@ -132,9 +132,9 @@ def nextgame_handler(bot, update, chat_data):
     if game is not None and game.game_state == secret_hitler.GameStates.ACCEPT_PLAYERS and game.num_players<10 and update.message.text.find("confirm")==-1:
         bot.send_message(chat_id=chat_id, text="You could still join the _current_ game via /joingame. Type '/nextgame confirm' if you really want to wait.", parse_mode=telegram.ParseMode.MARKDOWN)
     else:
-        if chat_id not in waiting_players_per_group:
-            waiting_players_per_group[chat_id]=[]
-        waiting_players_per_group[chat_id].append(update.message.from_user.id)
+        if "{}".format(chat_id) not in waiting_players_per_group:
+            waiting_players_per_group["{}".format(chat_id)]=[]
+        waiting_players_per_group["{}".format(chat_id)].append(update.message.from_user.id)
         bot.send_message(chat_id=update.message.from_user.id, text="I will notify you when a new game starts in [{}]({})".format(update.message.chat.title, bot.get_chat(chat_id=chat_id).invite_link), parse_mode=telegram.ParseMode.MARKDOWN)
 
 
@@ -154,8 +154,8 @@ def cancelgame_handler(bot, update, chat_data):
 
 
 def joingame_handler(bot, update, chat_data, user_data):
-    if waiting_players_per_group[update.message.chat.id] is not None:
-        waiting_players_per_group[update.message.chat.id].remove(update.message.from_user.id)
+    if waiting_players_per_group["{}".format(update.message.chat.id)] is not None:
+        waiting_players_per_group["{}".format(update.message.chat.id)].remove(update.message.from_user.id)
     game_command_handler(bot, update, chat_data, user_data)
 
 def leave_handler(bot, update, user_data):
@@ -180,7 +180,7 @@ def leave_handler(bot, update, user_data):
         player.leave_game(confirmed=True)
         reply = "Successfully left game!"
         if game is not None and game.game_state==secret_hitler.GameStates.ACCEPT_PLAYERS and game.num_players==9:
-            for waiting_player in waiting_players_per_group[game.global_chat]:
+            for waiting_player in waiting_players_per_group["{}".format(game.global_chat)]:
                 bot.send_message(chat_id=waiting_player, text="A slot just opened up in [{}]({})!".format(bot.get_chat(chat_id=game.global_chat).title, bot.get_chat(chat_id=game.global_chat).invite_link), parse_mode=telegram.ParseMode.MARKDOWN)
     if player is None:
         bot.send_message(chat_id=update.message.chat.id, text=reply)
