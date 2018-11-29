@@ -23,6 +23,7 @@ bot = telegram.Bot(token=API_KEY)
 updater = Updater(token=API_KEY)
 restored_players = {}
 restored_game = {}
+waiting_players_per_group = {} # Chat ID -> [Chat ID]
 
 
 def main():
@@ -112,6 +113,23 @@ def newgame_handler(bot, update, chat_data):
             game.set_game_state(secret_hitler.GameStates.GAME_OVER)
         chat_data["game_obj"] = secret_hitler.Game(chat_id)
         bot.send_message(chat_id=chat_id, text="Created game! /joingame to join, /startgame to start")
+
+
+def nextgame_handler(bot, update, chat_data):
+    """
+    Add the issuing player to the current group’s waiting list if there is a game in progress.
+    """
+    game = chat_data.get("game_obj")
+    chat_id = update.message.chat.id
+    if update.message.chat.type == "private":
+        bot.send_message(chat_id=chat_id, text="You can’t wait for new games in private chat!")
+    if game is not None and game.game_state == secret_hitler.GameStates.ACCEPT_PLAYERS and game.num_players<10 and update.message.text.find("confirm")==-1:
+        bot.send_message(chat_id=chat_id, text="You could still join the current game via /joingame. Type '/nextgame confirm' if you really want to wait.")
+    else:
+        if chat_id not in waiting_players_per_group:
+            waiting_players_per_group[chat_id]=[]
+        waiting_players_per_group[chat_id].append(update.message.from_user.id)
+        bot.send_message(chat_id=update.message.from_user.id, text="I will notify you when a new game starts in [{}](t.me/{})".format(update.message.chat.title, chat_id))
 
 
 def cancelgame_handler(bot, update, chat_data):
