@@ -24,6 +24,7 @@ updater = Updater(token=API_KEY)
 restored_players = {}
 restored_game = {}
 existing_games = {}
+waiting_players_per_group = {} # Chat ID -> [Chat ID]
 
 
 def main():
@@ -51,7 +52,8 @@ def main():
     dispatcher.add_handler(CommandHandler('cancelgame', cancelgame_handler, pass_chat_data=True))
     dispatcher.add_handler(CommandHandler('leave', leave_handler, pass_user_data=True))
     dispatcher.add_handler(CommandHandler('restart', restart_handler))
-
+    dispatcher.add_handler(CommandHandler('nextgame', nextgame_handler))
+    dispatcher.add_handler(CommandHandler('joingame', joingame_handler, pass_chat_data=True, pass_user_data=True))
     dispatcher.add_handler(
         CommandHandler(secret_hitler.Game.ACCEPTED_COMMANDS + tuple(COMMAND_ALIASES.keys()), game_command_handler,
                        pass_chat_data=True, pass_user_data=True))
@@ -109,11 +111,31 @@ def newgame_handler(bot, update, chat_data):
         bot.send_message(chat_id=chat_id,
                          text="Warning: game already in progress here. Reply '/newgame confirm' to confirm")
     else:
-        if game is not None:  # properly end that game
+        if game is not None:  # properly end any previous game
             game.set_game_state(secret_hitler.GameStates.GAME_OVER)
         chat_data["game_obj"] = secret_hitler.Game(chat_id)
         bot.send_message(chat_id=chat_id, text="Created game! /joingame to join, /startgame to start")
         existing_games[chat_id] = chat_data["game_obj"]
+        for waiting_player in waiting_players_per_group[chat_id]:
+            bot.send_message(chat_id=waiting_player, text="A new game is starting in [{}](t.me/{})!".format(update.message.chat.title, chat_id))
+        del waiting_players_per_group[chat_id]
+
+
+def nextgame_handler(bot, update, chat_data):
+    """
+    Add the issuing player to the current group’s waiting list if there is a game in progress.
+    """
+    game = chat_data.get("game_obj")
+    chat_id = update.message.chat.id
+    if update.message.chat.type == "private":
+        bot.send_message(chat_id=chat_id, text="You can’t wait for new games in private chat!")
+    if game is not None and game.game_state == secret_hitler.GameStates.ACCEPT_PLAYERS and game.num_players<10 and update.message.text.find("confirm")==-1:
+        bot.send_message(chat_id=chat_id, text="You could still join the _current_ game via /joingame. Type '/nextgame confirm' if you really want to wait.")
+    else:
+        if chat_id not in waiting_players_per_group:
+            waiting_players_per_group[chat_id]=[]
+        waiting_players_per_group[chat_id].append(update.message.from_user.id)
+        bot.send_message(chat_id=update.message.from_user.id, text="I will notify you when a new game starts in [{}](t.me/{})".format(update.message.chat.title, chat_id))
 
 
 def cancelgame_handler(bot, update, chat_data):
@@ -130,6 +152,11 @@ def cancelgame_handler(bot, update, chat_data):
     else:
         bot.send_message(chat_id=chat_id, text="No game in progress here.")
 
+
+def joingame_handler(bot, update, chat_data, user_data):
+    if waiting_players_per_group[update.message.chat.id] is not None:
+        waiting_players_per_group[update.message.cnhat.id].remove(update.message.from_user.id)
+    game_command_handler(bot, update, chat_data, user_data)
 
 def leave_handler(bot, update, user_data):
     """
@@ -149,9 +176,12 @@ def leave_handler(bot, update, user_data):
     if player is None or player.game is None:
         reply = "No game to leave!"
     else:
+        game = player.game
         player.leave_game(confirmed=True)
         reply = "Successfully left game!"
-
+        if game is not None and game.game_state==secret_hitler.GameStates.ACCEPT_PLAYERS and game.num_players==9:
+            for waiting_player in waiting_players_per_group[game.global_chat]:
+                bot.send_message(chat_id=waiting_player, text="A slot just opened up in [{}](t.me/{})!".format(bot.get_chat(chat_id=game.global_chat).title, game.global_chat))
     if player is None:
         bot.send_message(chat_id=update.message.chat.id, text=reply)
     else:
@@ -208,7 +238,7 @@ def parse_message(msg):
     return command, args
 
 
-COMMAND_ALIASES = {"nom": "nominate", "blam": "blame", "dig": "investigate", "log": "logs"}
+COMMAND_ALIASES = {"nom": "nominate", "blam": "blame", "dig": "investigate", "log": "logs", "stats": "logs"}
 
 
 def game_command_handler(bot, update, chat_data, user_data):
