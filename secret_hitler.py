@@ -808,42 +808,42 @@ class Game(object):
 
         if self.game_state == GameStates.CHANCY_NOMINATION:
             self.global_message("President {} must nominate a chancellor".format(self.president))
-            self.president.send_message("Pick your chancellor!\n(\"/nominate [player name or index]\")")
+            self.president.send_message("Pick your chancellor!\n(/nominate [player name or index])")
         elif self.game_state == GameStates.ELECTION:
             self.global_message(
                 "Election: Vote on President {} and Chancellor {}".format(self.president, self.chancellor))
             for p in self.players:  # send individual messages to clarify who you're voting on
                 if p not in self.dead_players:
-                    p.send_message("{} / {} vote (\/ja\" or \"/nein\"):".format(self.president, self.chancellor))
+                    p.send_message("{} / {} vote (/ja or /nein):".format(self.president, self.chancellor))
         elif self.game_state == GameStates.LEG_PRES:
             self.global_message("Legislative session in progress (waiting on President {})".format(self.president))
-            self.president.send_message("Pick a policy to discard!\n(\"/discard [POLICY]\")")
+            self.president.send_message("Pick a policy to discard!\n(/discard [policy])")
             self.deck_peek(self.president, 3)
         elif self.game_state == GameStates.LEG_CHANCY:
             self.global_message("Legislative session in progress (waiting on Chancellor {})".format(self.chancellor))
-            self.chancellor.send_message("Pick a policy to enact!\n(\"/enact [POLICY]\")")
+            self.chancellor.send_message("Pick a policy to enact!\n(/enact [policy])")
             self.deck_peek(self.chancellor, 2)
         elif self.game_state == GameStates.VETO_CHOICE:
             self.global_message(
                 "President ({}) and Chancellor ({}) are deciding whether to veto (both must agree to do so)".format(
                     self.president, self.chancellor))
-            self.president.send_message("Would you like to veto? (\"/ja\" or \"/nein\")")
-            self.chancellor.send_message("Would you like to veto? (\"/ja\" or \"/nein\")")
+            self.president.send_message("Would you like to veto? (/ja or /nein)")
+            self.chancellor.send_message("Would you like to veto? (/ja or /nein)")
             self.president_veto_vote = None
             self.chancellor_veto_vote = None
         elif self.game_state == GameStates.INVESTIGATION:
             self.global_message("President ({}) must investigate another player".format(self.president))
             self.president.send_message(
-                "Pick a player to investigate!\n(\"/investigate [player name or index]\")" + self.list_players())
+                "Pick a player to investigate!\n(/investigate [player name or index])" + self.list_players())
         elif self.game_state == GameStates.SPECIAL_ELECTION:
             self.global_message(
                 "Special Election: President ({}) must choose the next presidential candidate".format(self.president))
             self.president.send_message(
-                "Pick the next presidential candidate!\n(\"/nominate [player name or index]\")" + self.list_players())
+                "Pick the next presidential candidate!\n(/nominate [player name or index])" + self.list_players())
         elif self.game_state == GameStates.EXECUTION:
             self.global_message("President ({}) must kill someone".format(self.president))
             self.president.send_message(
-                "Pick someone to kill!\n(\"/kill [player name or index]\")" + self.list_players())
+                "Pick someone to kill!\n(/kill [player name or index])" + self.list_players())
         elif self.game_state == GameStates.GAME_OVER:
             # self.global_message("\n".join(["{} - {}".format(p, p.role) for p in self.players]))
             # reveal all player roles when the game has ended
@@ -905,11 +905,11 @@ class Game(object):
             if target:
                 return target.get_markdown_tag()
             else:
-                return "Usage: /whois \[player name]"
+                return "Usage: /whois [player name]"
         elif command == "changename":
             if from_player in self.players:
                 if args == "":
-                    return "Must specify new name like this: /changename [NEW NAME]"
+                    return "Must specify new name like this: /changename [new name]"
                 else:
                     new_name = args
                     error_msg = self.check_name(new_name, current_player=from_player)
@@ -1039,10 +1039,10 @@ class Game(object):
                         return "Error: you can't nominate yourself for president.".format(target)
             elif command == "kill" and self.game_state == GameStates.EXECUTION:
                 if from_player == target and not target_confirmed:
-                    return "You are about to kill yourself (technically allowed by the rules). Reply '/kill me too thanks' to confirm suicide."
+                    return "You are about to kill yourself (technically allowed by the rules). Reply /kill `me too thanks` to confirm suicide."
                 elif from_player.role == "Fascist" and target.role == "Hitler" and not target_confirmed:
                     from_player.send_message(
-                        "It looks like you are trying to kill Hitler. You WILL LOSE THE GAME if you proceed. Reply '/kill hitler' to confirm.")
+                        "It looks like you are trying to kill Hitler. You WILL LOSE THE GAME if you proceed. Reply /kill `hitler` to confirm.")
                     return
                 else:
                     self.kill(target)
