@@ -52,7 +52,7 @@ def main():
     dispatcher.add_handler(CommandHandler('cancelgame', cancelgame_handler, pass_chat_data=True))
     dispatcher.add_handler(CommandHandler('leave', leave_handler, pass_user_data=True))
     dispatcher.add_handler(CommandHandler('restart', restart_handler))
-    dispatcher.add_handler(CommandHandler('nextgame', nextgame_handler))
+    dispatcher.add_handler(CommandHandler('nextgame', nextgame_handler, pass_chat_data=True))
     dispatcher.add_handler(CommandHandler('joingame', joingame_handler, pass_chat_data=True, pass_user_data=True))
     dispatcher.add_handler(
         CommandHandler(secret_hitler.Game.ACCEPTED_COMMANDS + tuple(COMMAND_ALIASES.keys()), game_command_handler,
