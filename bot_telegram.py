@@ -117,7 +117,7 @@ def newgame_handler(bot, update, chat_data):
         bot.send_message(chat_id=chat_id, text="Created game! /joingame to join, /startgame to start")
         existing_games["{}".format(chat_id)] = chat_data["game_obj"]
         for waiting_player in waiting_players_per_group["{}".format(chat_id)]:
-            bot.send_message(chat_id=waiting_player, text="A new game is starting in [{}]({})!".format(update.message.chat.title, bot.get_chat(chat_id=chat_id).invite_link), parse_mode=telegram.ParseMode.MARKDOWN)
+            bot.send_message(chat_id=int(waiting_player), text="A new game is starting in [{}]({})!".format(update.message.chat.title, bot.get_chat(chat_id=chat_id).invite_link), parse_mode=telegram.ParseMode.MARKDOWN)
         del waiting_players_per_group["{}".format(chat_id)]
 
 
@@ -154,7 +154,7 @@ def cancelgame_handler(bot, update, chat_data):
 
 
 def joingame_handler(bot, update, chat_data, user_data):
-    if waiting_players_per_group["{}".format(update.message.chat.id)] is not None:
+    if "{}".format(update.message.chat.id) in waiting_players_per_group and waiting_players_per_group["{}".format(update.message.chat.id)] is not None:
         waiting_players_per_group["{}".format(update.message.chat.id)].remove(update.message.from_user.id)
     game_command_handler(bot, update, chat_data, user_data)
 
@@ -202,10 +202,10 @@ def restart_handler(bot, update):
     logging.debug("Restart issued by: user_id: %s in chat_id: %s, group admins: %s", user_id, chat_id, admin_ids)
 
     if chat_id == DEV_CHAT_ID and user_id in admin_ids:
-        if len([game for game in existing_games if existing_games["{}".format(game)].game_state!=secret_hitler.GameStates.GAME_OVER])>0 and update.message.text.find('confirm')==-1:
+        if len([game for game in existing_games if "{}".format(game) in existing_games and ["{}".format(game)].game_state!=secret_hitler.GameStates.GAME_OVER])>0 and update.message.text.find('confirm')==-1:
             bot.send_message(chat_id=chat_id, text="{} running game(s) found. Type `/restart confirm` to cancel those games and restart anyway.".format(len(existing_games)))
         else:
-            for game_chat_id in [int(game) for game in existing_games if existing_games["{}".format(game)].game_state!=secret_hitler.GameStates.GAME_OVER]:
+            for game_chat_id in [int(game) for game in existing_games if "{}".format(game) in existing_games and existing_games["{}".format(game)].game_state!=secret_hitler.GameStates.GAME_OVER]:
                 existing_games["{}".format(game_chat_id)].set_game_state(secret_hitler.GameStates.GAME_OVER)
                 bot.send_message(chat_id=game_chat_id, text="This game has been cancelled. Don’t be sad! Bugfixes and cool new features are coming!")
             # No need to clear the existing_games dict as the bot is shutting down anyway
