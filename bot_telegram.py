@@ -110,11 +110,13 @@ def newgame_handler(bot, update, chat_data):
         bot.send_message(chat_id=chat_id,
                          text="Warning: game already in progress here. Reply '/newgame confirm' to confirm")
     else:
-        if game is not None:  # properly end that game
+        if game is not None:  # properly end any previous game
             game.set_game_state(secret_hitler.GameStates.GAME_OVER)
         chat_data["game_obj"] = secret_hitler.Game(chat_id)
         bot.send_message(chat_id=chat_id, text="Created game! /joingame to join, /startgame to start")
-
+        for waiting_player in waiting_players_per_group[chat_id]:
+            bot.send_message(chat_id=waiting_player, text="A new game is starting in [{}](t.me/{})!".format(update.message.chat.title, chat_id))
+        del waiting_players_per_group[chat_id]
 
 def nextgame_handler(bot, update, chat_data):
     """
