@@ -154,7 +154,7 @@ def cancelgame_handler(bot, update, chat_data):
 
 
 def joingame_handler(bot, update, chat_data, user_data):
-    if "{}".format(update.message.chat.id) in waiting_players_per_group and waiting_players_per_group["{}".format(update.message.chat.id)] is not None:
+    if "{}".format(update.message.chat.id) in waiting_players_per_group and waiting_players_per_group["{}".format(update.message.chat.id)] is not None and update.message.from_user.id in waiting_players_per_group["{}".format(update.message.chat.id)]:
         waiting_players_per_group["{}".format(update.message.chat.id)].remove(update.message.from_user.id)
     game_command_handler(bot, update, chat_data, user_data)
 
