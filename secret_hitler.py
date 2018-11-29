@@ -347,8 +347,11 @@ class Game(object):
         if name.isdigit() and int(name) <= 10:
             return "Error: name cannot be a number between 1 and 10"
 
-        if name.endswith("(TL)") or name.endswith("(P)") or name.endswith("(C)") \
-                or name.endswith("(RIP)") or name.endswith("(CNH)"):
+        if name.endswith("(TL)") \
+        or name.endswith("(P)") \
+        or name.endswith("(C)") \
+        or name.endswith("(RIP)") \
+        or name.endswith("(CNH)"):
             return "Error: names cannot spoof the annotations from /listplayers"
         if markdown_regex.match(name):
             return "Error: names cannot contain markdown characters"
@@ -1047,10 +1050,10 @@ class Game(object):
                 else:
                     self.kill(target)
                     self.global_message("{} has killed {}.".format(from_player, target))
+                    target.send_message("You are now dead. RIP. Remember "
+                                        + "that dead players SHOULD NOT TALK, reveal their "
+                                        + "secret role, or otherwise influence the game!")
                     self.advance_presidency()
-                    target.send_message("You are now dead. RIP. Remember " + \
-                                        "that dead players SHOULD NOT TALK, reveal their " + \
-                                        "secret role, or otherwise influence the game!")
             elif command == "investigate" and self.game_state == GameStates.INVESTIGATION:
                 self.investigate(from_player, target)
                 self.advance_presidency()
