@@ -59,7 +59,7 @@ def main():
                        pass_chat_data=True, pass_user_data=True))
     dispatcher.add_handler(CommandHandler('savegame', save_game, pass_chat_data=True, pass_user_data=True))
 
-    dispatcher.add_handler(CallbackQueryHandler(button_handler))
+    dispatcher.add_handler(CallbackQueryHandler(button_handler, pass_chat_data=True, pass_user_data=True))
 
     dispatcher.add_error_handler(handle_error)
 
@@ -99,13 +99,12 @@ def get_static_handler(command):
                                bot.send_message(chat_id=update.message.chat.id, text=response)))
 
 
-def button_handler(bot, update):
+def button_handler(bot, update, chat_data, user_data):
     """
     Handles any command sent to the bot via an inline button
     """
-    update.message.text = update.callback_query.data
-    global updater
-    updater.dispatcher.process_update(update)
+    command, args = parse_message(update.callback_query.data)
+    game_command_executor(bot, command, args, update.callback_query.from_user, update.callback_query.message.chat.id, chat_data, user_data)
 
 
 def newgame_handler(bot, update, chat_data):
@@ -254,14 +253,17 @@ COMMAND_ALIASES = {"nom": "nominate", "blam": "blame", "dig": "investigate", "lo
 
 
 def game_command_handler(bot, update, chat_data, user_data):
+    command, args = parse_message(update.message.text)
+    game_command_executor(bot, command, args, update.message.from_user, update.message.chat.id, chat_data)
+
+
+def game_command_executor(bot, command, args, from_user, chat_id, chat_data, user_data):
     """
     Pass all commands that secret_hitler.Game can handle to game's handle_message method
     Send outputs as replies via Telegram
     """
-    command, args = parse_message(update.message.text)
     if command in list(COMMAND_ALIASES.keys()):
         command = COMMAND_ALIASES[command]
-    player_id, chat_id = update.message.from_user.id, update.message.chat.id
 
     # Try to restore relevant save data (and mark this data as dirty)
     global restored_game
@@ -269,9 +271,9 @@ def game_command_handler(bot, update, chat_data, user_data):
     if restored_game is not None and restored_game.global_chat == chat_id:
         chat_data["game_obj"] = restored_game
         restored_game = None
-    if player_id in list(restored_players.keys()):
-        user_data["player_obj"] = restored_players[player_id]
-        del restored_players[player_id]
+    if from_user.id in list(restored_players.keys()):
+        user_data["player_obj"] = restored_players[from_user.id]
+        del restored_players[from_user.id]
 
     player = None
     game = None
@@ -289,10 +291,10 @@ def game_command_handler(bot, update, chat_data, user_data):
             return
         else:
             if args and (game.check_name(args) is None):  # args is a valid name
-                player = secret_hitler.Player(player_id, args)
+                player = secret_hitler.Player(from_user.id, args)
             else:
                 # TODO: maybe also chack their Telegram first name for validity
-                player = secret_hitler.Player(player_id, update.message.from_user.first_name)
+                player = secret_hitler.Player(from_user.id, from_user.first_name)
 
             user_data["player_obj"] = player
     else:
@@ -313,7 +315,7 @@ def game_command_handler(bot, update, chat_data, user_data):
         # pass all supressed errors (if any) directly to the handler in
         # the order that they occurred
         while len(secret_hitler.telegram_errors) > 0:
-            handle_error(bot, update, secret_hitler.telegram_errors.pop(0))
+            handle_error(bot, command, secret_hitler.telegram_errors.pop(0))
         # TODO: it would be cleaner to just have a consumer thread handling
         # these errors as they occur
 
