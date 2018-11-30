@@ -9,7 +9,7 @@ from subprocess import call
 
 import telegram
 from telegram.error import TelegramError
-from telegram.ext import Updater, CommandHandler
+from telegram.ext import Updater, CommandHandler, CallbackQueryHandler
 
 import secret_hitler
 
@@ -59,6 +59,8 @@ def main():
                        pass_chat_data=True, pass_user_data=True))
     dispatcher.add_handler(CommandHandler('savegame', save_game, pass_chat_data=True, pass_user_data=True))
 
+    dispatcher.add_handler(CallbackQueryHandler(button_handler))
+
     dispatcher.add_error_handler(handle_error)
 
     # allows viewing of exceptions
@@ -95,6 +97,15 @@ def get_static_handler(command):
     return CommandHandler(command, \
                           (lambda bot, update: \
                                bot.send_message(chat_id=update.message.chat.id, text=response)))
+
+
+def button_handler(bot, update):
+    """
+    Handles any command sent to the bot via an inline button
+    """
+    update.message.text = update.callback_query.data
+    global updater
+    updater.dispatcher.process_update(update)
 
 
 def newgame_handler(bot, update, chat_data):
