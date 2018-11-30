@@ -254,7 +254,7 @@ COMMAND_ALIASES = {"nom": "nominate", "blam": "blame", "dig": "investigate", "lo
 
 def game_command_handler(bot, update, chat_data, user_data):
     command, args = parse_message(update.message.text)
-    game_command_executor(bot, command, args, update.message.from_user, update.message.chat.id, chat_data)
+    game_command_executor(bot, command, args, update.message.from_user, update.message.chat.id, chat_data, user_data)
 
 
 def game_command_executor(bot, command, args, from_user, chat_id, chat_data, user_data):
