@@ -816,7 +816,8 @@ class Game(object):
                 reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(candidate.name, callback_data="/nominate {}".format(candidate.name))]
                     for candidate in self.players if
                     candidate not in self.termlimited_players and
-                    candidate not in self.dead_players
+                    candidate not in self.dead_players and
+                    candidate != self.president
                 ]
             ))
         elif self.game_state == GameStates.ELECTION:
