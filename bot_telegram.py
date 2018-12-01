@@ -105,6 +105,7 @@ def button_handler(bot, update, chat_data, user_data):
     """
     command, args = parse_message(update.callback_query.data)
     game_command_executor(bot, command, args, update.callback_query.from_user, update.callback_query.message.chat.id, chat_data, user_data)
+    update.callback_query.message.edit_message(text=update.callback_query.message.text)
 
 
 def newgame_handler(bot, update, chat_data):
