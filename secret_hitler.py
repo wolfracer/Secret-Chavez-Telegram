@@ -825,25 +825,25 @@ class Game(object):
             for p in self.players:  # send individual messages to clarify who you're voting on
                 if p not in self.dead_players:
                     p.send_message("Vote for President {} and Chancellor {}:".format(self.president, self.chancellor),
-                        reply_markup=InlineKeyboardMarkup([InlineKeyboardButton("Ja", callback_data="/ja"), InlineKeyboardButton("Nein", callback_data="/nein")]))
+                        reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Ja", callback_data="/ja"), InlineKeyboardButton("Nein", callback_data="/nein")]]))
         elif self.game_state == GameStates.LEG_PRES:
             self.global_message("Legislative session in progress (waiting on President {})".format(self.president))
             self.deck_peek(self.president, 3)
             self.president.send_message("Pick a policy to discard!)",
-                reply_markup=InlineKeyboardMarkup([InlineKeyboardButton(policy, callback_data="/discard {}".format(policy)) for policy in self.deck[:3]]))
+                reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(policy, callback_data="/discard {}".format(policy)) for policy in self.deck[:3]]]))
         elif self.game_state == GameStates.LEG_CHANCY:
             self.global_message("Legislative session in progress (waiting on Chancellor {})".format(self.chancellor))
             self.deck_peek(self.chancellor, 2)
             self.chancellor.send_message("Pick a policy to enact!",
-                reply_markup=InlineKeyboardMarkup([InlineKeyboardButton(policy, callback_data="/enact {}".format(policy)) for policy in self.deck[:2]]))
+                reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(policy, callback_data="/enact {}".format(policy)) for policy in self.deck[:2]]]))
         elif self.game_state == GameStates.VETO_CHOICE:
             self.global_message(
                 "President ({}) and Chancellor ({}) are deciding whether to veto (both must agree to do so)".format(
                     self.president, self.chancellor))
             self.president.send_message("Would you like to veto?",
-                reply_markup=InlineKeyboardMarkup([InlineKeyboardButton("Ja", callback_data="/ja"), InlineKeyboardButton("Nein", callback_data="/nein")]))
+                reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Ja", callback_data="/ja"), InlineKeyboardButton("Nein", callback_data="/nein")]]))
             self.chancellor.send_message("Would you like to veto?",
-                reply_markup=InlineKeyboardMarkup([InlineKeyboardButton("Ja", callback_data="/ja"), InlineKeyboardButton("Nein", callback_data="/nein")]))
+                reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Ja", callback_data="/ja"), InlineKeyboardButton("Nein", callback_data="/nein")]]))
             self.president_veto_vote = None
             self.chancellor_veto_vote = None
         elif self.game_state == GameStates.INVESTIGATION:
