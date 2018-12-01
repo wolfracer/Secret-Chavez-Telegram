@@ -128,9 +128,10 @@ def newgame_handler(bot, update, chat_data):
         chat_data["game_obj"] = secret_hitler.Game(chat_id)
         bot.send_message(chat_id=chat_id, text="Created game! /joingame to join, /startgame to start")
         existing_games["{}".format(chat_id)] = chat_data["game_obj"]
-        for waiting_player in waiting_players_per_group["{}".format(chat_id)]:
-            bot.send_message(chat_id=int(waiting_player), text="A new game is starting in [{}]({})!".format(update.message.chat.title, bot.get_chat(chat_id=chat_id).invite_link), parse_mode=telegram.ParseMode.MARKDOWN)
-        del waiting_players_per_group["{}".format(chat_id)]
+        if "{}".format(chat_id) in waiting_players_per_group:
+            for waiting_player in waiting_players_per_group["{}".format(chat_id)]:
+                bot.send_message(chat_id=int(waiting_player), text="A new game is starting in [{}]({})!".format(update.message.chat.title, bot.get_chat(chat_id=chat_id).invite_link), parse_mode=telegram.ParseMode.MARKDOWN)
+            del waiting_players_per_group["{}".format(chat_id)]
 
 
 def nextgame_handler(bot, update, chat_data):
