@@ -119,6 +119,8 @@ def newgame_handler(bot, update, chat_data):
     chat_id = update.message.chat.id
     if update.message.chat.type == "private":
         bot.send_message(chat_id=chat_id, text="You can’t create a game in a private chat!")
+    elif MAINTENANCE_MODE:
+        bot.send_message(chat_id=chat_id, text="A restart has been scheduled. No new games can be created while we wait for the remaining {} to finish.".format("game" if len(existing_games)==1 else "{} games".format(len(existing_games))))
     elif game is not None and game.game_state != secret_hitler.GameStates.GAME_OVER and update.message.text.find(
             "confirm") == -1:
         bot.send_message(chat_id=chat_id,
