@@ -149,6 +149,7 @@ class Game(object):
         self.spectators = set()
         self.public_history = ""
         self.spectator_history = ""
+        self.logs = []  # [(message, [known_to])]
 
         self.last_nonspecial_president = None
         self.vetoable_polcy = None
