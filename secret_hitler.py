@@ -146,6 +146,7 @@ class Game(object):
         self.dead_players = set()
         self.confirmed_not_hitlers = set()
 
+        self.spectator = Player(None, "Spectator")  # dummy player used for logs access
         self.spectators = set()
         self.public_history = ""
         self.spectator_history = ""
