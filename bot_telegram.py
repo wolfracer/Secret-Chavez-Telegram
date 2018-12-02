@@ -23,8 +23,9 @@ bot = telegram.Bot(token=API_KEY)
 updater = Updater(token=API_KEY)
 restored_players = {}
 restored_game = {}
-existing_games = {}
-waiting_players_per_group = {} # Chat ID -> [Chat ID]
+MAINTENANCE_MODE = False
+existing_games = {}  # Chat ID -> Game
+waiting_players_per_group = {}  # Chat ID -> [Chat ID]
 
 
 def main():
@@ -118,6 +119,8 @@ def newgame_handler(bot, update, chat_data):
     chat_id = update.message.chat.id
     if update.message.chat.type == "private":
         bot.send_message(chat_id=chat_id, text="You can’t create a game in a private chat!")
+    elif MAINTENANCE_MODE:
+        bot.send_message(chat_id=chat_id, text="A restart has been scheduled. No new games can be created while we wait for the remaining {} to finish.".format("game" if len(existing_games)==1 else "{} games".format(len(existing_games))))
     elif game is not None and game.game_state != secret_hitler.GameStates.GAME_OVER and update.message.text.find(
             "confirm") == -1:
         bot.send_message(chat_id=chat_id,
@@ -171,6 +174,7 @@ def joingame_handler(bot, update, chat_data, user_data):
         waiting_players_per_group["{}".format(update.message.chat.id)].remove(update.message.from_user.id)
     game_command_handler(bot, update, chat_data, user_data)
 
+
 def leave_handler(bot, update, user_data):
     """
     Forces a user to leave their current game, regardless of game state (could
@@ -214,25 +218,32 @@ def restart_handler(bot, update):
 
     logging.debug("Restart issued by: user_id: %s in chat_id: %s, group admins: %s", user_id, chat_id, admin_ids)
 
+    global MAINTENANCE_MODE
+    MAINTENANCE_MODE = True
+
     if chat_id == DEV_CHAT_ID and user_id in admin_ids:
         if len([game for game in existing_games if "{}".format(game) in existing_games and existing_games["{}".format(game)].game_state!=secret_hitler.GameStates.GAME_OVER])>0 and update.message.text.find('confirm')==-1:
-            bot.send_message(chat_id=chat_id, text="{} running game(s) found. Type `/restart confirm` to cancel those games and restart anyway.".format(len(existing_games)))
+            bot.send_message(chat_id=chat_id, text="{} running game(s) found. Type `/restart confirm` to cancel those games and restart anyway. Otherwise, the bot will restart after {} ended.".format(len(existing_games), "that game has" if len(existing_games)==1 else "those games have"))
         else:
             for game_chat_id in [int(game) for game in existing_games if "{}".format(game) in existing_games and existing_games["{}".format(game)].game_state!=secret_hitler.GameStates.GAME_OVER]:
                 existing_games["{}".format(game_chat_id)].set_game_state(secret_hitler.GameStates.GAME_OVER)
                 bot.send_message(chat_id=game_chat_id, text="This game has been cancelled. Don’t be sad! Bugfixes and cool new features are coming!")
             # No need to clear the existing_games dict as the bot is shutting down anyway
-            if call(["git", "pull"]) != 0:
-                logging.error("git pull failed")
-                bot.send_message(chat_id=chat_id, text="Failed pulling newest bot version. Shutting down anyway.")
-            else:
-                logging.info("git pull successful")
-                bot.send_message(chat_id=chat_id, text="Pulled newest bot version. Shutting down.")
-            # For reasons™ the stop function needs to be called in a new thread.
-            # (https://github.com/python-telegram-bot/python-telegram-bot/issues/801#issuecomment-323778248)
-            threading.Thread(target=stop_bot).start()
+            restart_executor()
     else:
         logging.warning("Restart command issued in unauthorized group or by non-admin user. Not reacting.")
+
+
+def restart_executor():
+    if call(["git", "pull"]) != 0:
+        logging.error("git pull failed")
+        bot.send_message(chat_id=DEV_CHAT_ID, text="Failed pulling newest bot version. Shutting down anyway.")
+    else:
+        logging.info("git pull successful")
+        bot.send_message(chat_id=DEV_CHAT_ID, text="Pulled newest bot version. Shutting down.")
+    # For reasons™ the stop function needs to be called in a new thread.
+    # (https://github.com/python-telegram-bot/python-telegram-bot/issues/801#issuecomment-323778248)
+    threading.Thread(target=stop_bot).start()
 
 
 def parse_message(msg):
@@ -326,6 +337,10 @@ def game_command_executor(bot, command, args, from_user, chat_id, chat_data, use
             bot.send_message(chat_id=chat_id, text=reply, parse_mode=telegram.ParseMode.MARKDOWN)
 
     except secret_hitler.GameOverException:
+        if game.global_chat in existing_games:
+            del existing_games[game.global_chat]
+        if len(existing_games)==0 and MAINTENANCE_MODE:
+            restart_executor()
         return
 
 
