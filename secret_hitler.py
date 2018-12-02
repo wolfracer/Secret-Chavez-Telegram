@@ -697,7 +697,7 @@ class Game(object):
         elif self.fascist == 3:
             if self.num_players in (5, 6):  # EXAMINE
                 self.check_reshuffle()
-                self.global_message("President ({}) is examining top 3 policies".format(self.president))
+                self.global_message("President {} is examining top 3 policies".format(self.president))
                 self.president.send_message("Top three policies are: ")
                 self.deck_peek(self.president, 3)
             elif self.num_players in (7, 8, 9, 10):
@@ -748,7 +748,7 @@ class Game(object):
 
         who.send_message(policies)
 
-        spectator_who = {self.president: "President ({})", self.chancellor: "Chancellor ({})"}.get(who, "{}")
+        spectator_who = {self.president: "President {}", self.chancellor: "Chancellor {}"}.get(who, "{}")
         spectator_who = spectator_who.format(who)
 
         self.record_log("{} peeks at {}".format(spectator_who, policies), known_to=[who])
@@ -850,7 +850,7 @@ class Game(object):
                 reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(policy, callback_data="/enact {}".format(policy)) for policy in self.deck[:2]]]))
         elif self.game_state == GameStates.VETO_CHOICE:
             self.global_message(
-                "President ({}) and Chancellor ({}) are deciding whether to veto (both must agree to do so)".format(
+                "President {} and Chancellor {} are deciding whether to veto (both must agree to do so)".format(
                     self.president, self.chancellor))
             self.president.send_message("Would you like to veto?",
                 reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Ja", callback_data="/ja"), InlineKeyboardButton("Nein", callback_data="/nein")]]))
@@ -859,19 +859,19 @@ class Game(object):
             self.president_veto_vote = None
             self.chancellor_veto_vote = None
         elif self.game_state == GameStates.INVESTIGATION:
-            self.global_message("President ({}) must investigate another player".format(self.president))
+            self.global_message("President {} must investigate another player".format(self.president))
             self.president.send_message("Pick a player to investigate!",
                 reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(candidate.name, callback_data="/investigate {}".format(candidate.name))]
                     for candidate in self.players if candidate not in self.dead_players]))
         elif self.game_state == GameStates.SPECIAL_ELECTION:
             self.global_message(
-                "Special Election: President ({}) must choose the next presidential candidate".format(self.president))
+                "Special Election: President {} must choose the next presidential candidate".format(self.president))
             self.president.send_message(
                 "Pick the next presidential candidate!",
                 reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(candidate.name, callback_data="/nominate {}".format(candidate.name))]
                     for candidate in self.players if candidate not in self.dead_players and candidate != self.president]))
         elif self.game_state == GameStates.EXECUTION:
-            self.global_message("President ({}) must kill someone".format(self.president))
+            self.global_message("President {} must kill someone".format(self.president))
             self.president.send_message(
                 "Pick someone to kill!",
                 reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(candidate.name, callback_data="/nominate {}".format(candidate.name))]
