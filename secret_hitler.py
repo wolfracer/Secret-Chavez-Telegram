@@ -315,7 +315,7 @@ class Game(object):
     def add_spectator(self, target):
         if target not in self.spectators:
             self.spectators.add(target)
-            target.send_message(self.spectator_history)
+            target.send_message(self.show_logs(include_knowledge_of=self.spectator))
 
     def remove_spectator(self, target):
         if target in self.spectators:
@@ -881,7 +881,7 @@ class Game(object):
             # reveal all player roles when the game has ended
 
             # reveal EVERYTHING THAT HAPPENED when game ends
-            self.global_message(self.spectator_history)
+            self.global_message(self.show_logs(include_knowledge_of=self.players))
 
             for p in self.players:
                 p.game = None  # allow players to join other games
