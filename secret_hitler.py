@@ -310,7 +310,7 @@ class Game(object):
                 p.send_message(msg)
 
     def show_logs(self, include_knowledge_of=None):
-        return "\n".join([info for info, known_to in self.logs if len([player for player in include_knowledge_of if player in known_to]) > 0])
+        return "Logs:"+"\n".join([info for info, known_to in self.logs if len([player for player in include_knowledge_of if player in known_to]) > 0])
 
     def add_spectator(self, target):
         if target not in self.spectators:
