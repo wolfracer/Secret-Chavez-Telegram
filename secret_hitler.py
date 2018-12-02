@@ -538,7 +538,7 @@ class Game(object):
 
         self.record_log("{}".format("JA!" if election_result else "NEIN!"), known_to=self.players)
         if self.votes.count(False) > 0:
-            self.record_log("Against: {}".format(", ".join([player for player, vote in zip(self.players, self.votes) if vote == False])), known_to=self.players)
+            self.record_log("Against: {}".format(", ".join([player.name for player, vote in zip(self.players, self.votes) if vote == False])), known_to=self.players)
 
         if election_result:
             if self.fascist >= 3:
