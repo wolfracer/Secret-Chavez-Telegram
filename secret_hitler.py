@@ -293,13 +293,16 @@ class Game(object):
                 else:
                     raise e
 
-    def record_data(self, msg, spectator_only=False):
-        self.spectator_history += msg
-        if spectator_only:
+    def record_data(self, msg, known_to=None):
+        if known_to is None:
+            known_to = self.players
+        if self.spectator not in known_to:
+            known_to.append(self.spectator)
+
+        self.logs.append((msg, known_to))
+        if len(known_to) == 1:  # only known to the spectators, so they’re informed separately
             for p in self.spectators:
                 p.send_message(msg)
-        else:
-            self.public_history += msg
 
     def show_logs(self, include_knowledge_of=None):
         return "\n".join([info for info, known_to in self.logs if len([player for player in include_knowledge_of if player in known_to]) > 0])
