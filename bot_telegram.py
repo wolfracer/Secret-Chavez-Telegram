@@ -336,8 +336,8 @@ def game_command_executor(bot, command, args, from_user, chat_id, chat_data, use
             bot.send_message(chat_id=chat_id, text=reply, parse_mode=telegram.ParseMode.MARKDOWN)
 
     except secret_hitler.GameOverException:
-        if game.global_chat in existing_games:
-            del existing_games[game.global_chat]
+        if "{}".format(game.global_chat) in existing_games:
+            del existing_games["{}".format(game.global_chat)]
         if len(existing_games) == 0 and MAINTENANCE_MODE:
             restart_executor()
         elif MAINTENANCE_MODE:
