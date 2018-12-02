@@ -146,8 +146,8 @@ class Game(object):
         self.dead_players = set()
         self.confirmed_not_hitlers = set()
 
-        self.spectator = Player(None, "Spectator")  # dummy player used for logs access
-        self.group = Player(None, "Group")  # dummy player used for logs access
+        self.spectator = Player(None, "spectators")  # dummy player used for logs access
+        self.group = Player(None, "everyone")  # dummy player used for logs access
         self.spectators = set()
         self.logs = []  # [(message, [known_to])]
 
