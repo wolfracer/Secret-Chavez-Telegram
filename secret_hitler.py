@@ -753,7 +753,7 @@ class Game(object):
         spectator_who = {self.president: "President {}", self.chancellor: "Chancellor {}"}.get(who, "{}")
         spectator_who = spectator_who.format(who)
 
-        self.record_log("{} peeks at {}".format(spectator_who, policies), known_to=[who])
+        self.record_log("{} peeks at {}".format(spectator_who, policies), known_to=[self.president, who])
 
     def special_elect(self, target):
         """
