@@ -147,9 +147,8 @@ class Game(object):
         self.confirmed_not_hitlers = set()
 
         self.spectator = Player(None, "Spectator")  # dummy player used for logs access
+        self.group = Player(None, "Group")  # dummy player used for logs access
         self.spectators = set()
-        self.public_history = ""
-        self.spectator_history = ""
         self.logs = []  # [(message, [known_to])]
 
         self.last_nonspecial_president = None
