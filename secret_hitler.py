@@ -299,9 +299,9 @@ class Game(object):
                     raise e
 
     def record_data(self, msg, known_to=None):
-        if known_to is None:
-            known_to = self.players
-        if self.spectator not in known_to:
+        if known_to is None or known_to == self.players:
+            known_to = self.players + [self.group]
+        if self.spectator not in known_to:  # spectators always see everything
             known_to.append(self.spectator)
 
         self.logs.append((msg, known_to))
