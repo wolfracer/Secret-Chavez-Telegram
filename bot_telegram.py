@@ -313,7 +313,7 @@ def game_command_executor(bot, command, args, from_user, chat_id, chat_data, use
     # at this point, 'player' and 'game' should both be set correctly
 
     try:
-        reply = game.handle_message(player, command, args)
+        reply = game.handle_message(chat_id, player, command, args)
 
         # pass all supressed errors (if any) directly to the handler in
         # the order that they occurred

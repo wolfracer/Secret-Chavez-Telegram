@@ -923,7 +923,7 @@ class Game(object):
                          "nominate", "kill", "investigate", "enact", "discard", "whois",
                          "spectate", "unspectate", "logs")
 
-    def handle_message(self, from_player, command, args=""):
+    def handle_message(self, chat_id, from_player, command, args=""):
         """
         Handle the message "/command args" from from_player. Using the game state
         and origin, perform the appropriate actions and change state if necessary.
@@ -965,7 +965,10 @@ class Game(object):
             self.remove_spectator(from_player)
             from_player.send_message("You are no longer spectating")
         elif command == "logs":
-            return self.public_history
+            if chat_id == self.global_chat:
+                return self.show_logs([self.group])
+            else:
+                return self.show_logs([player for player in self.players if player.id == from_player])
         elif self.game_state == GameStates.ACCEPT_PLAYERS:
             if command == "joingame":
                 if self.num_players == 10:
