@@ -338,8 +338,12 @@ def game_command_executor(bot, command, args, from_user, chat_id, chat_data, use
     except secret_hitler.GameOverException:
         if game.global_chat in existing_games:
             del existing_games[game.global_chat]
-        if len(existing_games)==0 and MAINTENANCE_MODE:
+        if len(existing_games) == 0 and MAINTENANCE_MODE:
             restart_executor()
+        elif MAINTENANCE_MODE:
+            bot.send_message(chat_id=DEV_CHAT_ID, text="A game has ended but there are {} more games, so I won’t restart yet".format(len(existing_games)))
+        else:
+            bot.send_message(chat_id=DEV_CHAT_ID, text="A game has ended.")
         return
 
 
