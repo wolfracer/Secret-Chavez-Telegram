@@ -215,9 +215,12 @@ def restart_handler(bot, update):
 
     logging.debug("Restart issued by: user_id: %s in chat_id: %s, group admins: %s", user_id, chat_id, admin_ids)
 
+    global MAINTENANCE_MODE
+    MAINTENANCE_MODE = True
+
     if chat_id == DEV_CHAT_ID and user_id in admin_ids:
         if len([game for game in existing_games if "{}".format(game) in existing_games and existing_games["{}".format(game)].game_state!=secret_hitler.GameStates.GAME_OVER])>0 and update.message.text.find('confirm')==-1:
-            bot.send_message(chat_id=chat_id, text="{} running game(s) found. Type `/restart confirm` to cancel those games and restart anyway.".format(len(existing_games)))
+            bot.send_message(chat_id=chat_id, text="{} running game(s) found. Type `/restart confirm` to cancel those games and restart anyway. Otherwise, the bot will restart after {} ended.".format(len(existing_games), "that game has" if len(existing_games)==1 else "those games have"))
         else:
             for game_chat_id in [int(game) for game in existing_games if "{}".format(game) in existing_games and existing_games["{}".format(game)].game_state!=secret_hitler.GameStates.GAME_OVER]:
                 existing_games["{}".format(game_chat_id)].set_game_state(secret_hitler.GameStates.GAME_OVER)
