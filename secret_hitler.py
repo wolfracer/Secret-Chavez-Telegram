@@ -454,6 +454,7 @@ class Game(object):
 
             self.global_message("President {} has nominated Chancellor {}.".format(self.president, self.chancellor))
             self.set_game_state(GameStates.ELECTION)
+            self.record_log("────────────────────", known_to=self.players)
             self.record_log("President {} nominated Chancellor {} ".format(self.president, self.chancellor), known_to=self.players)
 
             return True
@@ -607,6 +608,7 @@ class Game(object):
             random.shuffle(self.deck)
 
             self.global_message("Deck has been reshuffled.")
+            self.record_log("────────────────────", known_to=self.players)
             self.record_log("_Deck reshuffled_", known_to=self.players)
 
     def check_veto(self):
