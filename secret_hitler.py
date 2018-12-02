@@ -841,7 +841,7 @@ class Game(object):
         elif self.game_state == GameStates.LEG_PRES:
             self.global_message("Legislative session in progress (waiting on President {})".format(self.president))
             self.deck_peek(self.president, 3)
-            self.president.send_message("Pick a policy to discard!)",
+            self.president.send_message("Pick a policy to discard!",
                 reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(policy, callback_data="/discard {}".format(policy)) for policy in self.deck[:3]]]))
         elif self.game_state == GameStates.LEG_CHANCY:
             self.global_message("Legislative session in progress (waiting on Chancellor {})".format(self.chancellor))
