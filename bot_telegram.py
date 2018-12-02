@@ -174,6 +174,7 @@ def joingame_handler(bot, update, chat_data, user_data):
         waiting_players_per_group["{}".format(update.message.chat.id)].remove(update.message.from_user.id)
     game_command_handler(bot, update, chat_data, user_data)
 
+
 def leave_handler(bot, update, user_data):
     """
     Forces a user to leave their current game, regardless of game state (could
@@ -336,6 +337,10 @@ def game_command_executor(bot, command, args, from_user, chat_id, chat_data, use
             bot.send_message(chat_id=chat_id, text=reply, parse_mode=telegram.ParseMode.MARKDOWN)
 
     except secret_hitler.GameOverException:
+        if game.global_chat in existing_games:
+            del existing_games[game.global_chat]
+        if len(existing_games)==0 and MAINTENANCE_MODE:
+            restart_executor()
         return
 
 
