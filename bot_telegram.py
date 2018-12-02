@@ -23,8 +23,9 @@ bot = telegram.Bot(token=API_KEY)
 updater = Updater(token=API_KEY)
 restored_players = {}
 restored_game = {}
-existing_games = {}
-waiting_players_per_group = {} # Chat ID -> [Chat ID]
+MAINTENANCE_MODE = False
+existing_games = {}  # Chat ID -> Game
+waiting_players_per_group = {}  # Chat ID -> [Chat ID]
 
 
 def main():
