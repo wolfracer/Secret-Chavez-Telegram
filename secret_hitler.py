@@ -968,7 +968,7 @@ class Game(object):
             if chat_id == self.global_chat:
                 return self.show_logs([self.group])
             else:
-                return self.show_logs([player for player in self.players if player.id == from_player])
+                return self.show_logs([from_player])
         elif self.game_state == GameStates.ACCEPT_PLAYERS:
             if command == "joingame":
                 if self.num_players == 10:
