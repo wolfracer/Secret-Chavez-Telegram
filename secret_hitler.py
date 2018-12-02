@@ -439,7 +439,7 @@ class Game(object):
                 leave_message += "\nYou need {} more players before you can start.".format(
                     ["5️⃣", "4️⃣", "3️⃣", "2️⃣", "1️⃣"][self.num_players], "" if self.num_players == 4 else "s")
             else:
-                leave_message += "\nType /startgame to start the game with {} players!".format(self.num_players)
+                leave_message += "\nType /startgame to start the game with {} players!".format(["0️⃣", "1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"][self.num_players])
         self.global_message(leave_message)
 
     def select_chancellor(self, target):
