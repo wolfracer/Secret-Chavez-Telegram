@@ -455,7 +455,7 @@ class Game(object):
             self.global_message("President {} has nominated Chancellor {}.".format(self.president, self.chancellor))
             self.set_game_state(GameStates.ELECTION)
             self.record_log("────────────────────", known_to=self.players)
-            self.record_log("President {} nominated Chancellor {} ".format(self.president, self.chancellor), known_to=self.players)
+            self.record_log("{} + {}".format(self.president, self.chancellor), known_to=self.players)
 
             return True
 
@@ -657,7 +657,7 @@ class Game(object):
         else:
             self.pass_fascist(on_anarchy)
 
-        self.record_log("President {} and Chancellor {} enacted a {} policy.".format(self.president, self.chancellor, "Liberal" if policy == "L" else "Fascist"), known_to=self.players)
+        self.record_log("Enacted: {}".format("Liberal" if policy == "L" else "Fascist"), known_to=self.players)
 
         self.check_reshuffle()
         if not on_anarchy and self.game_state == GameStates.LEG_CHANCY:  # don't need to wait for other decisison
@@ -769,7 +769,7 @@ class Game(object):
         self.last_nonspecial_president = self.president
         self.president = target
 
-        self.record_log("President {} special elects {}".format(self.president, target), known_to=self.players)
+        self.record_log("{} special elects {}".format(self.president, target), known_to=self.players)
         return True
 
     def kill(self, target):
@@ -779,7 +779,7 @@ class Game(object):
             Otherwise, this player will be unable to vote, be nominated, or run for president
             for the remainder of the game.
         """
-        self.record_log("President {} executed {}!".format(self.president, target), known_to=self.players)
+        self.record_log("{} executed {}!".format(self.president, target), known_to=self.players)
         if target.role == "Hitler":
             self.end_game("Liberal", "Hitler was killed")
         else:
