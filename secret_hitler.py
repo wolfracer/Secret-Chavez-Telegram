@@ -1005,7 +1005,7 @@ class Game(object):
                 return
             else:
                 return "Error: game has not started"
-        if command == "boardstats":
+        elif command == "boardstats":
             return self.show()
         elif command == "deckstats":
             return self.show(["deck_stats", "deck_stats_detailed"])
