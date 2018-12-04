@@ -657,7 +657,7 @@ class Game(object):
         else:
             self.pass_fascist(on_anarchy)
 
-        self.record_log("Enacted: {}".format("Liberal" if policy == "L" else "Fascist"), known_to=self.players)
+        self.record_log("Enacted: {}".format("💠 Liberal" if policy == "L" else "💢 Fascist"), known_to=self.players)
 
         self.check_reshuffle()
         if not on_anarchy and self.game_state == GameStates.LEG_CHANCY:  # don't need to wait for other decisison
