@@ -9,7 +9,7 @@ import unicodedata
 from enum import Enum
 
 from telegram.error import Unauthorized, TelegramError
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ParseMode
 
 import bot_telegram
 
@@ -290,7 +290,7 @@ class Game(object):
             print("[ Message for everyone ]\n{}".format(msg))
         else:
             try:
-                bot_telegram.bot.send_message(chat_id=self.global_chat, text=msg, reply_markup=reply_markup, parse_mode=telegram.ParseMode.MARKDOWN)
+                bot_telegram.bot.send_message(chat_id=self.global_chat, text=msg, reply_markup=reply_markup, parse_mode=ParseMode.MARKDOWN)
             except TelegramError as e:
                 if supress_errors:
                     telegram_errors.append(e)
