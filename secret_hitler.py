@@ -315,7 +315,7 @@ class Game(object):
     def add_spectator(self, target):
         if target not in self.spectators:
             self.spectators.add(target)
-            target.send_message(self.show_logs(include_knowledge_of=self.spectator))
+            target.send_message(self.show_logs(include_knowledge_of=[self.spectator]))
 
     def remove_spectator(self, target):
         if target in self.spectators:
