@@ -651,12 +651,12 @@ class Game(object):
         if we don't need to wait for a decision related to executive power (according to the game_state),
         advances the presidency
         """
+        self.record_log("Enacted: {}".format("💠 Liberal" if policy == "L" else "💢 Fascist"), known_to=self.players)
+
         if policy == "L":
             self.pass_liberal()
         else:
             self.pass_fascist(on_anarchy)
-
-        self.record_log("Enacted: {}".format("💠 Liberal" if policy == "L" else "💢 Fascist"), known_to=self.players)
 
         self.check_reshuffle()
         if not on_anarchy and self.game_state == GameStates.LEG_CHANCY:  # don't need to wait for other decisison
