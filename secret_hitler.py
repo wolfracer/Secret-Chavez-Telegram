@@ -794,9 +794,9 @@ class Game(object):
          - reset election tracker
          - and clear term limits
         """
-        self.check_reshuffle()
         self.record_log("Anarchy!", known_to=self.players)
         self.pass_policy(self.deck.pop(0), on_anarchy=True)
+        self.check_reshuffle()
 
         self.termlimited_players.clear()
         self.anarchy_progress = 0
