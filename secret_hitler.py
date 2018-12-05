@@ -168,8 +168,7 @@ class Game(object):
     def reset_blame_ratelimit(self):
         self.last_blame = time.time() - BLAME_RATELIMIT
 
-    def show(self, things_to_show=["liberal", "fascist", "", "anarchy", "", "players", "", "deck_stats", "",
-                                   "hitler_warning"]):
+    def show(self, things_to_show=None):
         """
         Builds a textual representation of selected board stats,
         including:
@@ -181,8 +180,12 @@ class Game(object):
         - Draw/Discard pile information         "deck_stats"
             - detailed info on policies         "deck_stats_detailed"
         - HitlerZone information                "hitler_warning"
-        - A blank line                          ""
+        - A blank line                          "br"
+        - A separator                           "-"
         """
+        if things_to_show is None:
+            things_to_show = ["liberal", "fascist", "br", "anarchy", "-", "players", "br", "deck_stats", "-",
+                              "hitler_warning"]
         message = ""
         to_show, rest = things_to_show[0], things_to_show[1:]
         if to_show == "liberal":
@@ -212,8 +215,10 @@ class Game(object):
         elif to_show == "hitler_warning":
             if self.fascist >= 3:
                 message += "‼️ Beware: If Hitler gets elected as Chancellor, the fascists win the game! ‼️"
-        elif to_show == "":
+        elif to_show == "br":
             message += "\n"
+        elif to_show == "-":
+            message += "────────────────────"
         elif len(to_show) > 0:
             message += "(I don’t know what you mean by “{}”)".format(to_show)
         if len(rest) > 0:
@@ -454,7 +459,7 @@ class Game(object):
 
             self.global_message("President {} has nominated Chancellor {}.".format(self.president, self.chancellor))
             self.set_game_state(GameStates.ELECTION)
-            self.record_log("────────────────────", known_to=self.players)
+            self.record_log(self.show(["-"]), known_to=self.players)
             self.record_log("{} + {}".format(self.president, self.chancellor), known_to=self.players)
 
             return True
@@ -607,7 +612,7 @@ class Game(object):
             random.shuffle(self.deck)
 
             self.global_message("Deck has been reshuffled.")
-            self.record_log("────────────────────", known_to=self.players)
+            self.record_log(self.show(["-"]), known_to=self.players)
             self.record_log("_Deck reshuffled_", known_to=self.players)
 
     def check_veto(self):
