@@ -600,8 +600,7 @@ class Game(object):
         Check if the deck needs to be reshuffled (has <= 3 policies remaining).
         If it does, reshuffles the deck and announces this.
         """
-        if len(
-                self.deck) <= 3:  # NOTE: official rules say not to shuffle when there are 3 policies but this is a house rule
+        if len(self.deck) < 3:
             self.deck.extend(self.discard)
             del self.discard[:]
 
