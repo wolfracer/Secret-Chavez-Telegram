@@ -185,7 +185,7 @@ class Game(object):
         - A separator                           "-"
         """
         if things_to_show is None:
-            things_to_show = ["liberal", "fascist", "br", "anarchy", "-", "players", "br", "deck_stats", "-",
+            things_to_show = ["liberal", "fascist", "br", "anarchy", "-", "players", "-", "deck_stats", "br",
                               "hitler_warning"]
         message = ""
         to_show, rest = things_to_show[0], things_to_show[1:]
