@@ -793,10 +793,11 @@ class Game(object):
         if target == self.president:
             return False  # cannot special elect self
 
+        self.record_log("{} special elects {}".format(self.president, target), known_to=self.players)
+
         self.last_nonspecial_president = self.president
         self.president = target
 
-        self.record_log("{} special elects {}".format(self.president, target), known_to=self.players)
         return True
 
     def kill(self, target):
