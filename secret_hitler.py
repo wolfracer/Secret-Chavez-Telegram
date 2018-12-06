@@ -219,7 +219,7 @@ class Game(object):
         elif to_show == "br":
             message += "\n"
         elif to_show == "-":
-            message += "────────────────────"
+            message += "───────────────"
         elif len(to_show) > 0:
             message += "(I don’t know what you mean by “{}”)".format(to_show)
         if len(rest) > 0:
