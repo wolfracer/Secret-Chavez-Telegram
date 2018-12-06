@@ -909,7 +909,7 @@ class Game(object):
             self.global_message("President {} must kill someone".format(self.president))
             self.president.send_message(
                 "Pick someone to kill!",
-                reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(candidate.name, callback_data="/nominate {}".format(candidate.name))]
+                reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(candidate.name, callback_data="/kill {}".format(candidate.name))]
                     for candidate in self.players if candidate not in self.dead_players]))
         elif self.game_state == GameStates.GAME_OVER:
             # self.global_message("\n".join(["{} - {}".format(p, p.role) for p in self.players]))
