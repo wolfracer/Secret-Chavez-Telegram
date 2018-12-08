@@ -334,7 +334,7 @@ class Game(object):
                     # time to elect
                     "???" if GameStates.LEG_PRES not in term else self.format_time(max(term[GameStates.ELECTION].values()) - term[GameStates.ELECTION][self.spectator]),
                     # time to legislate
-                    "???" if self.group not in term[GameStates.CHANCY_NOMINATION] else self.format_time(term[GameStates.CHANCY_NOMINATION][self.group] - term[GameStates.LEG_PRES][self.spectator])
+                    "???" if self.group not in term[GameStates.CHANCY_NOMINATION] or GameStates.LEG_PRES not in term else self.format_time(term[GameStates.CHANCY_NOMINATION][self.group] - term[GameStates.LEG_PRES][self.spectator])
                 )
             ) for index, term in enumerate(self.time_logs)]
         )
