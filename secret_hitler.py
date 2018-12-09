@@ -1005,7 +1005,7 @@ class Game(object):
             else:
                 return self.show_logs([from_player])
         elif command == "timelogs":
-            self.show_time_logs()
+            return self.show_time_logs()
         elif self.game_state == GameStates.ACCEPT_PLAYERS:
             if command == "joingame":
                 if self.num_players == 10:
