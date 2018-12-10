@@ -598,7 +598,7 @@ class Game(object):
         if discard in self.deck[:3]:
             self.deck.remove(discard)
             self.discard.append(discard)
-            self.time_logs[-1][self.game_state][self.president] = time.time()
+            self.time_logs[-1][self.game_state][self.president] = 0 + time.time()
             self.set_game_state(GameStates.LEG_CHANCY)
             return True
         else:
@@ -611,7 +611,7 @@ class Game(object):
         and False if input was invalid.
         """
         if enact in self.deck[:2]:
-            self.time_logs[-1][self.game_state][self.chancellor] = time.time()
+            self.time_logs[-1][self.game_state][self.chancellor] = 0 + time.time()
             self.deck.remove(enact)
             self.discard.append(self.deck.pop(0))
 
@@ -854,8 +854,8 @@ class Game(object):
         if new_state == GameStates.CHANCY_NOMINATION:
             self.time_logs.append({})
             if len(self.time_logs) > 1:
-                self.time_logs[-2][new_state][self.group] = time.time()  # store time at which the previous term ended
-        self.time_logs[-1][new_state] = {self.spectator: time.time()}  # store time at which the state was entered
+                self.time_logs[-2][new_state][self.group] = 0 + time.time()  # store time at which the previous term ended
+        self.time_logs[-1][new_state] = {self.spectator: 0 + time.time()}  # store time at which the state was entered
 
         if self.game_state == GameStates.CHANCY_NOMINATION:
             self.global_message("President {} must nominate a chancellor".format(self.president))
@@ -1101,13 +1101,13 @@ class Game(object):
             if command == "nominate":
                 if self.game_state == GameStates.CHANCY_NOMINATION:
                     if self.select_chancellor(target):
-                        self.time_logs[-1][self.game_state][from_player] = time.time()
+                        self.time_logs[-1][self.game_state][from_player] = 0 + time.time()
                         return None  # "You have nominated {} for chancellor.".format(target)
                     else:
                         return "Error: {} is term-limited/dead/yourself.".format(target)
                 elif self.game_state == GameStates.SPECIAL_ELECTION:
                     if self.special_elect(target):
-                        self.time_logs[-1][self.game_state][from_player] = time.time()
+                        self.time_logs[-1][self.game_state][from_player] = 0 + time.time()
                         self.set_game_state(GameStates.CHANCY_NOMINATION)
                         return None  # "You have nominated {} for president.".format(target)
                     else:
@@ -1120,7 +1120,7 @@ class Game(object):
                         "It looks like you are trying to kill Hitler. You WILL LOSE THE GAME if you proceed. Reply /kill `hitler` to confirm.")
                     return
                 else:
-                    self.time_logs[-1][self.game_state][from_player] = time.time()
+                    self.time_logs[-1][self.game_state][from_player] = 0 + time.time()
                     self.kill(target)
                     self.global_message("{} has killed {}.".format(from_player, target))
                     target.send_message("You are now dead. RIP. Remember "
@@ -1128,14 +1128,14 @@ class Game(object):
                                         + "secret role, or otherwise influence the game!")
                     self.advance_presidency()
             elif command == "investigate" and self.game_state == GameStates.INVESTIGATION:
-                self.time_logs[-1][self.game_state][from_player] = time.time()
+                self.time_logs[-1][self.game_state][from_player] = 0 + time.time()
                 self.investigate(from_player, target)
                 self.advance_presidency()
         elif command in ("ja", "nein"):
             vote = (command == "ja")
             if self.game_state == GameStates.ELECTION:
                 if from_player not in self.time_logs[-1][self.game_state]:  # Only record the first vote per election
-                    self.time_logs[-1][self.game_state][from_player] = time.time()
+                    self.time_logs[-1][self.game_state][from_player] = 0 + time.time()
                 self.votes[self.players.index(from_player)] = vote
 
                 if self.election_is_done():
@@ -1148,7 +1148,7 @@ class Game(object):
                         return "Nein vote recorded; quickly /ja to switch"
             elif self.game_state == GameStates.VETO_CHOICE and from_player in (self.president, self.chancellor):
                 if from_player not in self.time_logs[-1][self.game_state]:  # Only record the first vote per veto
-                    self.time_logs[-1][self.game_state][from_player] = time.time()
+                    self.time_logs[-1][self.game_state][from_player] = 0 + time.time()
                 if from_player == self.president:
                     self.president_veto_vote = vote
                 elif from_player == self.chancellor:
