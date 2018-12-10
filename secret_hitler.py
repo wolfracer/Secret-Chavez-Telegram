@@ -311,7 +311,7 @@ class Game(object):
             known_to.append(self.spectator)
 
         self.logs.append((msg, known_to))
-        if len(known_to) == 1:  # only known to the spectators, so they’re informed separately
+        if self.group not in known_to:  # non-public knowledge, so spectators are informed explicitly
             for p in self.spectators:
                 p.send_message(msg)
 
