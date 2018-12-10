@@ -320,7 +320,8 @@ class Game(object):
 
     @staticmethod
     def format_time(seconds):
-        return "{0:0>2}h {0:0>2}m".format(int(seconds / 3600), int((seconds / 60) % 60))
+        gmtime = time.gmtime(seconds)
+        return "{0:0>2}h {0:0>2}m".format(gmtime.tm_hour, gmtime.tm_min)
 
     def show_time_logs(self):
         return "Time Logs:\n\n" + ("\n{}\n".format(self.show(["-"]))).join(
