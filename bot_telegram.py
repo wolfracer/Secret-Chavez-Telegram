@@ -133,7 +133,7 @@ def newgame_handler(bot, update, chat_data):
         existing_games["{}".format(chat_id)] = chat_data["game_obj"]
         if "{}".format(chat_id) in waiting_players_per_group:
             for waiting_player in waiting_players_per_group["{}".format(chat_id)]:
-                bot.send_message(chat_id=int(waiting_player), text="A new game is starting in [{}]({})!".format(update.message.chat.title, bot.get_chat(chat_id=chat_id).invite_link), parse_mode=telegram.ParseMode.MARKDOWN)
+                bot.send_message(chat_id=int(waiting_player), text="A new game is starting in [{}]({})!".format(update.message.chat.title, bot.export_chat_invite_link(chat_id=chat_id)), parse_mode=telegram.ParseMode.MARKDOWN)
             del waiting_players_per_group["{}".format(chat_id)]
 
 
@@ -151,7 +151,7 @@ def nextgame_handler(bot, update, chat_data):
         if "{}".format(chat_id) not in waiting_players_per_group:
             waiting_players_per_group["{}".format(chat_id)]=[]
         waiting_players_per_group["{}".format(chat_id)].append(update.message.from_user.id)
-        bot.send_message(chat_id=update.message.from_user.id, text="I will notify you when a new game starts in [{}]({})".format(update.message.chat.title, bot.get_chat(chat_id=chat_id).invite_link), parse_mode=telegram.ParseMode.MARKDOWN)
+        bot.send_message(chat_id=update.message.from_user.id, text="I will notify you when a new game starts in [{}]({})".format(update.message.chat.title, bot.export_chat_invite_link(chat_id=chat_id)), parse_mode=telegram.ParseMode.MARKDOWN)
 
 
 def cancelgame_handler(bot, update, chat_data):
@@ -197,7 +197,7 @@ def leave_handler(bot, update, user_data):
         reply = "Successfully left game!"
         if game is not None and game.game_state==secret_hitler.GameStates.ACCEPT_PLAYERS and game.num_players==9:
             for waiting_player in waiting_players_per_group["{}".format(game.global_chat)]:
-                bot.send_message(chat_id=waiting_player, text="A slot just opened up in [{}]({})!".format(bot.get_chat(chat_id=game.global_chat).title, bot.get_chat(chat_id=game.global_chat).invite_link), parse_mode=telegram.ParseMode.MARKDOWN)
+                bot.send_message(chat_id=waiting_player, text="A slot just opened up in [{}]({})!".format(bot.get_chat(chat_id=game.global_chat).title, bot.export_chat_invite_link(chat_id=game.global_chat)), parse_mode=telegram.ParseMode.MARKDOWN)
     if player is None:
         bot.send_message(chat_id=update.message.chat.id, text=reply)
     else:
