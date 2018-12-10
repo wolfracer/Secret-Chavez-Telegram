@@ -325,7 +325,7 @@ class Game(object):
     def show_time_logs(self):
         return "Time Logs:\n\n" + ("\n{}\n".format(self.show(["-"]))).join(
             ["Term {}: {}".format(
-                index,
+                index + 1,
                 "{}\n  {} to nominate\n  {} to elect\n  {} to legislate".format(
                     # total time
                     "{} (and counting)".format(self.format_time(time.time() - term[GameStates.CHANCY_NOMINATION][self.spectator])) if self.group not in term[GameStates.CHANCY_NOMINATION] else self.format_time(term[GameStates.CHANCY_NOMINATION][self.group] - term[GameStates.CHANCY_NOMINATION][self.spectator]),
