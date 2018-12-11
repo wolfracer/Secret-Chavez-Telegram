@@ -1006,7 +1006,10 @@ class Game(object):
             else:
                 return self.show_logs([from_player])
         elif command == "timelogs":
-            return self.show_time_logs()
+            if chat_id == bot_telegram.DEV_CHAT_ID:
+                return self.time_logs
+            else:
+                return self.show_time_logs()
         elif self.game_state == GameStates.ACCEPT_PLAYERS:
             if command == "joingame":
                 if self.num_players == 10:
