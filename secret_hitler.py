@@ -340,6 +340,20 @@ class Game(object):
             ) for index, term in enumerate(self.time_logs)]
         )
 
+    # DEBUG
+    def print_time_logs(self):
+        message = "[\n"
+        for term in self.time_logs:
+            message += "  [\n"
+            for gamestate in term:
+                message += "    {}\n    [\n".format(gamestate)
+                for player in term[gamestate]:
+                    message += "      {}: {}\n".format(player, term[gamestate][player])
+                message += "    ]\n"
+            message += "  ]\n"
+        message += "]"
+        return message
+
     def add_spectator(self, target):
         if target not in self.spectators:
             self.spectators.add(target)
