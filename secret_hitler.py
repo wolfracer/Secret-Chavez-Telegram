@@ -1140,12 +1140,10 @@ class Game(object):
 
                 if self.election_is_done():
                     self.end_election()
-                    return None
+                if vote:
+                    return "Ja vote recorded; quickly /nein to switch"
                 else:
-                    if vote:
-                        return "Ja vote recorded; quickly /nein to switch"
-                    else:
-                        return "Nein vote recorded; quickly /ja to switch"
+                    return "Nein vote recorded; quickly /ja to switch"
             elif self.game_state == GameStates.VETO_CHOICE and from_player in (self.president, self.chancellor):
                 if from_player not in self.time_logs[-1][self.game_state]:  # Only record the first vote per veto
                     self.time_logs[-1][self.game_state][from_player] = 0 + time.time()
