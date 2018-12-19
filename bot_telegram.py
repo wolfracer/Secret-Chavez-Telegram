@@ -24,9 +24,13 @@ updater = Updater(token=API_KEY)
 restored_players = {}
 restored_game = {}
 MAINTENANCE_MODE = False
+MAX_MESSAGE_LENGTH = 4096
 existing_games = {}  # Chat ID -> Game
 waiting_players_per_group = {}  # Chat ID -> [Chat ID]
 
+
+def split_message(message, length=MAX_MESSAGE_LENGTH):
+    return [message[i:i + length] for i in range(0, len(message), length)]
 
 def main():
     global restored_players
@@ -98,7 +102,7 @@ def get_static_handler(command):
 
     return CommandHandler(command,
                           (lambda bot, update:
-                           bot.send_message(chat_id=update.message.chat.id, text=response, parse_mode=telegram.ParseMode.MARKDOWN)))
+                           [bot.send_message(chat_id=update.message.chat.id, text=part, parse_mode=telegram.ParseMode.MARKDOWN) for part in split_message(response)]))
 
 
 def button_handler(bot, update, chat_data, user_data):
@@ -335,7 +339,8 @@ def game_command_executor(bot, command, args, from_user, chat_id, chat_data, use
         # these errors as they occur
 
         if reply:  # reply is None if no response is necessary
-            bot.send_message(chat_id=chat_id, text=reply, parse_mode=telegram.ParseMode.MARKDOWN)
+            for part in split_message(reply):
+                bot.send_message(chat_id=chat_id, text=part, parse_mode=telegram.ParseMode.MARKDOWN)
 
     except secret_hitler.GameOverException:
         if "{}".format(game.global_chat) in existing_games:
