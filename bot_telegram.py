@@ -324,8 +324,9 @@ def game_command_executor(bot, command, args, from_user, chat_id, chat_data, use
 
     try:
         reply = game.handle_message(chat_id, player, command, args)
-        if command == "timelogs":
-            bot.send_message(chat_id=DEV_CHAT_ID, text=game.print_time_logs())  # DEBUG Print time logs data structure to dev chat
+        # DEBUG Print time logs data structure to dev chat
+        #   if command == "timelogs":
+        #     bot.send_message(chat_id=DEV_CHAT_ID, text=game.print_time_logs())
         # pass all supressed errors (if any) directly to the handler in
         # the order that they occurred
         while len(secret_hitler.telegram_errors) > 0:
