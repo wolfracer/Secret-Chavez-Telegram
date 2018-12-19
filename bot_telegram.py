@@ -96,9 +96,9 @@ def get_static_handler(command):
     f = open("static_responses/{}.txt".format(command), "r")
     response = f.read()
 
-    return CommandHandler(command, \
-                          (lambda bot, update: \
-                               bot.send_message(chat_id=update.message.chat.id, text=response)))
+    return CommandHandler(command,
+                          (lambda bot, update:
+                           bot.send_message(chat_id=update.message.chat.id, text=response, parse_mode=telegram.ParseMode.MARKDOWN)))
 
 
 def button_handler(bot, update, chat_data, user_data):
