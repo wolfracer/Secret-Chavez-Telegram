@@ -782,6 +782,7 @@ class Game(object):
         """
         origin.send_message("<{0}> party affiliation is <{0.party}>".format(target))
         self.global_message("{} has investigated {}".format(origin, target))
+        self.record_log("{} investigated {}".format(origin, target), known_to=self.players)
         self.record_log("{} knows that {} is a {}.".format(origin, target, target.party), known_to=[origin, target])
 
     def deck_peek(self, who, num=3):
