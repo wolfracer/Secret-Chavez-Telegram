@@ -331,7 +331,7 @@ class Game(object):
                     # total time
                     "{} (and counting)".format(self.format_time(time.time() - term[GameStates.CHANCY_NOMINATION][self.spectator])) if self.group not in term[GameStates.CHANCY_NOMINATION] else self.format_time(term[GameStates.CHANCY_NOMINATION][self.group] - term[GameStates.CHANCY_NOMINATION][self.spectator]),
                     # time to nominate
-                    "???" if GameStates.ELECTION not in term else self.format_time(max([term[GameStates.CHANCY_NOMINATION][player] for player in term[GameStates.CHANCY_NOMINATION] if player != self.group]) - term[GameStates.CHANCY_NOMINATION][self.spectator]),
+                    "???" if GameStates.ELECTION not in term else self.format_time(term[GameStates.ELECTION][self.spectator] - term[GameStates.CHANCY_NOMINATION][self.spectator]),
                     # time to elect
                     "???" if GameStates.LEG_PRES not in term else self.format_time(max(term[GameStates.ELECTION].values()) - term[GameStates.ELECTION][self.spectator]),
                     # time to legislate
