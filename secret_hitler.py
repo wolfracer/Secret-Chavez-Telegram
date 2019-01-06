@@ -1010,6 +1010,7 @@ class Game(object):
                 return "Error: you are already spectating. /unspectate to stop."
             else:
                 from_player.send_message("You are now spectating!")
+                from_player.join_game(self)
                 self.add_spectator(from_player)
                 return
         elif command == "unspectate":
