@@ -96,6 +96,7 @@ class Player(object):
             # TODO after testing, don't require confirmation to leave these games
             # or self.game.game_state in (GameStates.GAME_OVER, GameStates.ACCEPT_PLAYERS):
             self.game.remove_player(self)
+            self.game.remove_spectator(self)
 
             self.game = None
             self.role = None
@@ -936,6 +937,8 @@ class Game(object):
 
             for p in self.players:
                 p.game = None  # allow players to join other games
+            for s in self.spectators:
+                s.game = None  # allow spectators to join again
 
     def save(self, fname):
         """
