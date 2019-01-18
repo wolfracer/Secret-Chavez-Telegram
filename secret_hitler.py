@@ -1023,7 +1023,10 @@ class Game(object):
             if chat_id == self.global_chat:
                 return self.show_logs([self.group])
             else:
-                return self.show_logs([from_player])
+                if from_player in self.spectators:
+                    return self.show_logs([self.spectator])
+                else:
+                    return self.show_logs([from_player])
         elif command == "timelogs":
             return self.show_time_logs()
         elif self.game_state == GameStates.ACCEPT_PLAYERS:
