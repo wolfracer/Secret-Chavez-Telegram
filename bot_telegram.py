@@ -5,6 +5,7 @@ import logging
 import os
 import sys
 import threading
+import asyncio
 from subprocess import call
 
 import telegram
@@ -114,6 +115,14 @@ def button_handler(bot, update, chat_data, user_data):
     update.callback_query.message.edit_reply_markup()
 
 
+async def cancel_game_if_not_started_after_30_mins(bot, update, chat_data):
+    await asyncio.sleep(5) #DEBUG: Fail after 5s (30*60)  # 30 minutes
+    game = chat_data.get("game_obj")
+    if game is not None:
+        if game.game_state != secret_hitler.GameStates.ACCEPT_PLAYERS:
+            cancelgame_handler(bot, update, chat_data)
+
+
 def newgame_handler(bot, update, chat_data):
     """
     Create a new game (if doing so would overwrite an existing game in progress, only proceed if message contains "confirm")
@@ -133,6 +142,7 @@ def newgame_handler(bot, update, chat_data):
         if game is not None:  # properly end any previous game
             game.set_game_state(secret_hitler.GameStates.GAME_OVER)
         chat_data["game_obj"] = secret_hitler.Game(chat_id)
+        asyncio.ensure_future(cancel_game_if_not_started_after_30_mins())
         bot.send_message(chat_id=chat_id, text="Created game! /joingame to join, /startgame to start")
         existing_games["{}".format(chat_id)] = chat_data["game_obj"]
         if "{}".format(chat_id) in waiting_players_per_group:
