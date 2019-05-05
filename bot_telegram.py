@@ -33,6 +33,7 @@ waiting_players_per_group = {}  # Chat ID -> [Chat ID]
 def split_message(message, length=MAX_MESSAGE_LENGTH):
     return [message[i:i + length] for i in range(0, len(message), length)]
 
+
 def main():
     global restored_players
     global restored_game
@@ -44,6 +45,10 @@ def main():
             restored_players[p.id] = p
     else:
         restored_game = None
+
+    # Create a new event loop for asynchronous operations
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
 
     # Set up all command handlers
 
@@ -103,7 +108,9 @@ def get_static_handler(command):
 
     return CommandHandler(command,
                           (lambda bot, update:
-                           [bot.send_message(chat_id=update.message.chat.id, text=part, parse_mode=telegram.ParseMode.MARKDOWN) for part in split_message(response)]))
+                           [bot.send_message(chat_id=update.message.chat.id, text=part,
+                                             parse_mode=telegram.ParseMode.MARKDOWN) for part in
+                            split_message(response)]))
 
 
 def button_handler(bot, update, chat_data, user_data):
@@ -111,12 +118,13 @@ def button_handler(bot, update, chat_data, user_data):
     Handles any command sent to the bot via an inline button
     """
     command, args = parse_message(update.callback_query.data)
-    game_command_executor(bot, command, args, update.callback_query.from_user, update.callback_query.message.chat.id, chat_data, user_data)
+    game_command_executor(bot, command, args, update.callback_query.from_user, update.callback_query.message.chat.id,
+                          chat_data, user_data)
     update.callback_query.message.edit_reply_markup()
 
 
 async def cancel_game_if_not_started_after_30_mins(bot, update, chat_data):
-    await asyncio.sleep(5) #DEBUG: Fail after 5s (30*60)  # 30 minutes
+    await asyncio.sleep(5)  # DEBUG: Fail after 5s (30*60)  # 30 minutes
     game = chat_data.get("game_obj")
     if game is not None:
         if game.game_state != secret_hitler.GameStates.ACCEPT_PLAYERS:
@@ -133,7 +141,9 @@ def newgame_handler(bot, update, chat_data):
     if update.message.chat.type == "private":
         bot.send_message(chat_id=chat_id, text="You can’t create a game in a private chat!")
     elif MAINTENANCE_MODE:
-        bot.send_message(chat_id=chat_id, text="A restart has been scheduled. No new games can be created while we wait for the remaining {} to finish.".format("game" if len(existing_games)==1 else "{} games".format(len(existing_games))))
+        bot.send_message(chat_id=chat_id,
+                         text="A restart has been scheduled. No new games can be created while we wait for the remaining {} to finish.".format(
+                             "game" if len(existing_games) == 1 else "{} games".format(len(existing_games))))
     elif game is not None and game.game_state != secret_hitler.GameStates.GAME_OVER and update.message.text.find(
             "confirm") == -1:
         bot.send_message(chat_id=chat_id,
@@ -147,7 +157,11 @@ def newgame_handler(bot, update, chat_data):
         existing_games["{}".format(chat_id)] = chat_data["game_obj"]
         if "{}".format(chat_id) in waiting_players_per_group:
             for waiting_player in waiting_players_per_group["{}".format(chat_id)]:
-                bot.send_message(chat_id=int(waiting_player), text="A new game is starting in [{}]({})!".format(update.message.chat.title, bot.export_chat_invite_link(chat_id=chat_id)), parse_mode=telegram.ParseMode.MARKDOWN)
+                bot.send_message(chat_id=int(waiting_player),
+                                 text="A new game is starting in [{}]({})!".format(update.message.chat.title,
+                                                                                   bot.export_chat_invite_link(
+                                                                                       chat_id=chat_id)),
+                                 parse_mode=telegram.ParseMode.MARKDOWN)
             del waiting_players_per_group["{}".format(chat_id)]
 
 
@@ -159,13 +173,20 @@ def nextgame_handler(bot, update, chat_data):
     chat_id = update.message.chat.id
     if update.message.chat.type == "private":
         bot.send_message(chat_id=chat_id, text="You can’t wait for new games in private chat!")
-    if game is not None and game.game_state == secret_hitler.GameStates.ACCEPT_PLAYERS and game.num_players<10 and update.message.text.find("confirm")==-1:
-        bot.send_message(chat_id=chat_id, text="You could still join the _current_ game via /joingame. Type '/nextgame confirm' if you really want to wait.", parse_mode=telegram.ParseMode.MARKDOWN)
+    if game is not None and game.game_state == secret_hitler.GameStates.ACCEPT_PLAYERS and game.num_players < 10 and update.message.text.find(
+            "confirm") == -1:
+        bot.send_message(chat_id=chat_id,
+                         text="You could still join the _current_ game via /joingame. Type '/nextgame confirm' if you really want to wait.",
+                         parse_mode=telegram.ParseMode.MARKDOWN)
     else:
         if "{}".format(chat_id) not in waiting_players_per_group:
-            waiting_players_per_group["{}".format(chat_id)]=[]
+            waiting_players_per_group["{}".format(chat_id)] = []
         waiting_players_per_group["{}".format(chat_id)].append(update.message.from_user.id)
-        bot.send_message(chat_id=update.message.from_user.id, text="I will notify you when a new game starts in [{}]({})".format(update.message.chat.title, bot.export_chat_invite_link(chat_id=chat_id)), parse_mode=telegram.ParseMode.MARKDOWN)
+        bot.send_message(chat_id=update.message.from_user.id,
+                         text="I will notify you when a new game starts in [{}]({})".format(update.message.chat.title,
+                                                                                            bot.export_chat_invite_link(
+                                                                                                chat_id=chat_id)),
+                         parse_mode=telegram.ParseMode.MARKDOWN)
 
 
 def cancelgame_handler(bot, update, chat_data):
@@ -176,14 +197,17 @@ def cancelgame_handler(bot, update, chat_data):
 
     chat_id = update.message.chat.id
     if game is not None:
-        game.end_game("whole", "Game has been cancelled{}".format("" if MAINTENANCE_MODE else ". Type /newgame to start a new one"))
+        game.end_game("whole", "Game has been cancelled{}".format(
+            "" if MAINTENANCE_MODE else ". Type /newgame to start a new one"))
         del existing_games["{}".format(chat_id)]
     else:
         bot.send_message(chat_id=chat_id, text="No game in progress here.")
 
 
 def joingame_handler(bot, update, chat_data, user_data):
-    if "{}".format(update.message.chat.id) in waiting_players_per_group and waiting_players_per_group["{}".format(update.message.chat.id)] is not None and update.message.from_user.id in waiting_players_per_group["{}".format(update.message.chat.id)]:
+    if "{}".format(update.message.chat.id) in waiting_players_per_group and waiting_players_per_group[
+        "{}".format(update.message.chat.id)] is not None and update.message.from_user.id in waiting_players_per_group[
+        "{}".format(update.message.chat.id)]:
         waiting_players_per_group["{}".format(update.message.chat.id)].remove(update.message.from_user.id)
     game_command_handler(bot, update, chat_data, user_data)
 
@@ -209,9 +233,11 @@ def leave_handler(bot, update, user_data):
         game = player.game
         player.leave_game(confirmed=True)
         reply = "Successfully left game!"
-        if game is not None and game.game_state==secret_hitler.GameStates.ACCEPT_PLAYERS and game.num_players==9:
+        if game is not None and game.game_state == secret_hitler.GameStates.ACCEPT_PLAYERS and game.num_players == 9:
             for waiting_player in waiting_players_per_group["{}".format(game.global_chat)]:
-                bot.send_message(chat_id=waiting_player, text="A slot just opened up in [{}]({})!".format(bot.get_chat(chat_id=game.global_chat).title, bot.export_chat_invite_link(chat_id=game.global_chat)), parse_mode=telegram.ParseMode.MARKDOWN)
+                bot.send_message(chat_id=waiting_player, text="A slot just opened up in [{}]({})!".format(
+                    bot.get_chat(chat_id=game.global_chat).title,
+                    bot.export_chat_invite_link(chat_id=game.global_chat)), parse_mode=telegram.ParseMode.MARKDOWN)
     if player is None:
         bot.send_message(chat_id=update.message.chat.id, text=reply)
     else:
@@ -235,12 +261,20 @@ def restart_handler(bot, update):
     MAINTENANCE_MODE = True
 
     if chat_id == DEV_CHAT_ID and user_id in admin_ids:
-        if len([game for game in existing_games if "{}".format(game) in existing_games and existing_games["{}".format(game)].game_state!=secret_hitler.GameStates.GAME_OVER])>0 and update.message.text.find('confirm')==-1:
-            bot.send_message(chat_id=chat_id, text="{} running game(s) found. Type `/restart confirm` to cancel those games and restart anyway. Otherwise, the bot will restart after {} ended.".format(len(existing_games), "that game has" if len(existing_games)==1 else "those games have"))
+        if len([game for game in existing_games if "{}".format(game) in existing_games and existing_games[
+            "{}".format(game)].game_state != secret_hitler.GameStates.GAME_OVER]) > 0 and update.message.text.find(
+                'confirm') == -1:
+            bot.send_message(chat_id=chat_id,
+                             text="{} running game(s) found. Type `/restart confirm` to cancel those games and restart anyway. Otherwise, the bot will restart after {} ended.".format(
+                                 len(existing_games),
+                                 "that game has" if len(existing_games) == 1 else "those games have"))
         else:
-            for game_chat_id in [int(game) for game in existing_games if "{}".format(game) in existing_games and existing_games["{}".format(game)].game_state!=secret_hitler.GameStates.GAME_OVER]:
+            for game_chat_id in [int(game) for game in existing_games if
+                                 "{}".format(game) in existing_games and existing_games[
+                                     "{}".format(game)].game_state != secret_hitler.GameStates.GAME_OVER]:
                 existing_games["{}".format(game_chat_id)].set_game_state(secret_hitler.GameStates.GAME_OVER)
-                bot.send_message(chat_id=game_chat_id, text="This game has been cancelled. Don’t be sad! Bugfixes and cool new features are coming!")
+                bot.send_message(chat_id=game_chat_id,
+                                 text="This game has been cancelled. Don’t be sad! Bugfixes and cool new features are coming!")
             # No need to clear the existing_games dict as the bot is shutting down anyway
             restart_executor()
     else:
@@ -358,7 +392,9 @@ def game_command_executor(bot, command, args, from_user, chat_id, chat_data, use
         if len(existing_games) == 0 and MAINTENANCE_MODE:
             restart_executor()
         elif MAINTENANCE_MODE:
-            bot.send_message(chat_id=DEV_CHAT_ID, text="A game has ended but there are {} more games, so I won’t restart yet".format(len(existing_games)))
+            bot.send_message(chat_id=DEV_CHAT_ID,
+                             text="A game has ended but there are {} more games, so I won’t restart yet".format(
+                                 len(existing_games)))
         else:
             bot.send_message(chat_id=DEV_CHAT_ID, text="A game has ended.")
         return
@@ -415,4 +451,4 @@ def save_game(bot, update, chat_data, user_data):
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()
