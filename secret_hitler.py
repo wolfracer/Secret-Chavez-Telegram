@@ -479,7 +479,7 @@ class Game(object):
         # If we're staging a new game, show updated staging info
         if self.game_state == GameStates.ACCEPT_PLAYERS:
             if self.num_players < 5:
-                leave_message += "\nYou need {} more players before you can start.".format(
+                leave_message += "\nYou need {} more player{} before you can start.".format(
                     ["5️⃣", "4️⃣", "3️⃣", "2️⃣", "1️⃣"][self.num_players], "" if self.num_players == 4 else "s")
             else:
                 leave_message += "\nType /startgame to start the game with {} players!".format(["0️⃣", "1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"][self.num_players])
@@ -1044,7 +1044,7 @@ class Game(object):
                     from_player.name, BOT_USERNAME)
                 # Show updated staging info
                 if self.num_players < 5:
-                    welcome_message += "\nYou need {} more players before you can start.".format(
+                    welcome_message += "\nYou need {} more player{} before you can start.".format(
                         ["5️⃣", "4️⃣", "3️⃣", "2️⃣", "1️⃣"][self.num_players], "" if self.num_players == 4 else "s")
                 else:
                     welcome_message += "\nType /startgame to start the game with {} players!".format(self.num_players)
