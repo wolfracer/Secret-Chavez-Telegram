@@ -1,5 +1,2 @@
-*2019-05-05.1925:*
-   Fixed some formating errors.
-
 *2018-12-19.0127:*
    `/timelogs` should work now
