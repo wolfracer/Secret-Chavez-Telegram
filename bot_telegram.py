@@ -142,7 +142,7 @@ def newgame_handler(bot, update, chat_data):
         if game is not None:  # properly end any previous game
             game.set_game_state(secret_hitler.GameStates.GAME_OVER)
         chat_data["game_obj"] = secret_hitler.Game(chat_id)
-        asyncio.ensure_future(cancel_game_if_not_started_after_30_mins())
+        asyncio.ensure_future(cancel_game_if_not_started_after_30_mins(bot, update, chat_data))
         bot.send_message(chat_id=chat_id, text="Created game! /joingame to join, /startgame to start")
         existing_games["{}".format(chat_id)] = chat_data["game_obj"]
         if "{}".format(chat_id) in waiting_players_per_group:
