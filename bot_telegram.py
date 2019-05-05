@@ -415,4 +415,4 @@ def save_game(bot, update, chat_data, user_data):
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
