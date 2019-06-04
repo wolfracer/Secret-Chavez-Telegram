@@ -31,6 +31,8 @@ class Player(Base):
     party = Column(Text)
     role = Column(Text)
 
+    spectator = Column(Boolean, default=false)
+
 
 class Game(Base):
     __tablename__ = "games"
@@ -43,11 +45,10 @@ class Game(Base):
 
     self.discard = []
 
-    self.president = None
-    self.chancellor = None
-    self.termlimited_players = set()
-    self.dead_players = set()
-    self.confirmed_not_hitlers = set()
+    president_id = Column(Integer, ForeignKey("players.id"))
+    president = relationship("Player")
+    chancellor_id = Column(Integer, ForeignKey("players.id"))
+    chancellor = relationship("Player")
 
     # dummy players used for logs access
     spectator_id = Column(Integer, ForeignKey("players.id"), default=Player(name="spectators"))
@@ -55,7 +56,6 @@ class Game(Base):
     group_id = Column(Integer, ForeignKey("players.id"), default=Player(name="everyone"))
     group = relationship("Player")
 
-    self.spectators = set()
     self.logs = []  # [(message, [known_to])]
     self.time_logs = []  # [ GameState -> (Player -> timestamp) ]
 
@@ -80,4 +80,9 @@ class Vote(Base):
     id = Column(Integer, primary_key=True)
     game_id = Column(Integer, ForeignKey("games.id"), nullable=False)
     game = relationship("Game", back_populates="votes")
+    player_id = Column(Integer, ForeignKey("players.id"), nullable=False)
+    player = relationship("Player")
     vote = Column(Boolean, nullable=False)
+    termlimited = Column(Boolean)
+    confirmed_not_hitler = Column(Boolean)
+    dead = Column(Boolean)
