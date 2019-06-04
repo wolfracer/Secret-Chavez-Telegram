@@ -13,6 +13,9 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ParseMode
 
 import bot_telegram
 
+from model import *
+
+
 # Fix for #14
 all_unicode_chars = (chr(i) for i in range(sys.maxunicode))
 non_printable_chars = ''.join(c for c in all_unicode_chars if unicodedata.category(c) == 'Cc')
@@ -105,20 +108,6 @@ class Player(object):
         else:
             return False  # must confirm to successfully leave a game in one
             # of the more significant states
-
-
-class GameStates(Enum):
-    ACCEPT_PLAYERS = 1
-    CHANCY_NOMINATION = 2
-    ELECTION = 3
-    LEG_PRES = 4
-    LEG_CHANCY = 5
-    VETO_CHOICE = 6
-    INVESTIGATION = 7
-    SPECIAL_ELECTION = 8
-    EXECUTION = 9
-    GAME_OVER = 10
-
 
 class GameOverException(Exception):
     pass
