@@ -1,11 +1,12 @@
 from sqlalchemy import *
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import *
+import enum
 
 Base = declarative_base()
 
 
-class GameStates(Enum):
+class GameStates(enum.Enum):
     ACCEPT_PLAYERS = 1
     CHANCY_NOMINATION = 2
     ELECTION = 3
@@ -18,6 +19,22 @@ class GameStates(Enum):
     GAME_OVER = 10
 
 
+class Policy(enum.Enum):
+    F = 1
+    L = 2
+
+
+class Party(enum.Enum):
+    PARTY_FASCIST = 1
+    PARTY_LIBERAL = 2
+
+
+class Role(enum.Enum):
+    ROLE_FASCIST = 1
+    ROLE_LIBERAL = 2
+    ROLE_HITLER = 3
+
+
 class Player(Base):
     __tablename__ = "players"
 
@@ -26,10 +43,9 @@ class Player(Base):
     name = Column(Text, nullable=False)
 
     game_id = Column(Integer, ForeignKey("games.id"))
-    game = relationship("Game", back_populates="players")
 
-    party = Column(Text)
-    role = Column(Text)
+    party = Column(Enum(Party))
+    role = Column(Enum(Role))
 
     spectator = Column(Boolean, default=false)
 
@@ -43,7 +59,7 @@ class Game(Base):
 
     # players = back populated from Player
 
-    self.discard = []
+    # discards = back populated from Discard
 
     president_id = Column(Integer, ForeignKey("players.id"))
     president = relationship("Player")
@@ -56,13 +72,12 @@ class Game(Base):
     group_id = Column(Integer, ForeignKey("players.id"), default=Player(name="everyone"))
     group = relationship("Player")
 
-    self.logs = []  # [(message, [known_to])]
-    self.time_logs = []  # [ GameState -> (Player -> timestamp) ]
+    last_nonspecial_president_id = Column(Integer, ForeignKey("players.id"))
+    last_nonspecial_president = relationship("Player")
 
-    self.last_nonspecial_president = None
-    self.vetoable_polcy = None
-    self.president_veto_vote = None
-    self.chancellor_veto_vote = None
+    vetoable_policy = Column(Enum(Policy))
+    president_veto_vote = Column(Boolean)
+    chancellor_veto_vote = Column(Boolean)
 
     num_players = Column(Integer, default=0)
 
@@ -71,7 +86,43 @@ class Game(Base):
     fascist = Column(Integer, default=0)
     anarchy_progress = Column(Integer, default=0)
 
-    state = Enum(GameStates, default=GameStates.ACCEPT_PLAYERS)
+    state = Column(Enum(GameStates), default=GameStates.ACCEPT_PLAYERS)
+
+
+Player.game = relationship("Game", back_populates="players")  # add game to Player as it can't be added in player itself because Python needs it to be defined *before* usage, lol
+
+
+class Discard(Base):
+    __tablename__ = "discards"
+
+    id = Column(Integer, primary_key=True)
+
+    game_id = Column(Integer, ForeignKey("games.id"), nullable=False)
+    game = relationship("Game", back_populates="discards")
+
+    policy = Column(Enum(Policy))
+
+
+class Log(Base):
+    __tablename__ = "logs"
+
+    id = Column(Integer, primary_key=True)
+
+    game_id = Column(Integer, ForeignKey("games.id"), nullable=False)
+    game = relationship("Game", back_populates="logs")
+
+    message = Column(Text, nullable=False)
+
+
+class TimeLog(Base):
+    __tablename__ = "time_logs"
+
+    id = Column(Integer, primary_key=True)
+
+    game_id = Column(Integer, ForeignKey("games.id"), nullable=False)
+    game = relationship("Game", back_populates="time_logs")
+
+    # TODO time_logs :: [ GameState -> (Player -> timestamp) ]
 
 
 class Vote(Base):
