@@ -345,7 +345,7 @@ class Game(object):
             self.format_time(
                 functools.reduce(
                     lambda x, y: x+y,
-                    [term[GameStates.CHANCY_NOMINATION][self.group] - term[GameStates.CHANCY_NOMINATION][self.spectator] if index is not len(self.time_logs) else time.time() - term[GameStates.CHANCY_NOMINATION][self.spectator] for index, term in enumerate(self.time_logs)]
+                    [term[GameStates.CHANCY_NOMINATION][self.group] - term[GameStates.CHANCY_NOMINATION][self.spectator] if index is not (len(self.time_logs)-1) else time.time() - term[GameStates.CHANCY_NOMINATION][self.spectator] for index, term in enumerate(self.time_logs)]
                 )
             )
         )
