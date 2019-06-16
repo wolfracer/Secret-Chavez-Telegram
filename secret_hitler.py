@@ -7,6 +7,7 @@ import sys
 import time
 import unicodedata
 from enum import Enum
+import functools
 
 from telegram.error import Unauthorized, TelegramError
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ParseMode
@@ -339,6 +340,14 @@ class Game(object):
                     "???" if self.group not in term[GameStates.CHANCY_NOMINATION] or GameStates.LEG_PRES not in term else self.format_time(term[GameStates.CHANCY_NOMINATION][self.group] - term[GameStates.LEG_PRES][self.spectator])
                 )
             ) for index, term in enumerate(self.time_logs)]
+        ) + ("\n{}\n".format(self.show(["-"])))\
+                + "Total Time: {}".format(
+            self.format_time(
+                functools.reduce(
+                    lambda x, y: x+y,
+                    [term[GameStates.CHANCY_NOMINATION][self.group] - term[GameStates.CHANCY_NOMINATION][self.spectator] if index is not (len(self.time_logs)-1) else time.time() - term[GameStates.CHANCY_NOMINATION][self.spectator] for index, term in enumerate(self.time_logs)]
+                )
+            )
         )
 
     # DEBUG
