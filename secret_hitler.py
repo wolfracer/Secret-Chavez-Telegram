@@ -704,7 +704,7 @@ class Game(object):
         if we don't need to wait for a decision related to executive power (according to the game_state),
         advances the presidency
         """
-        self.record_log("Enacted: {}".format("💠 Liberal" if policy == "L" else "💢 Fascist"), known_to=self.players)
+        self.record_log("{} Enacted: {}".format("💠" if policy == "L" else "💢", "Liberal" if policy == "L" else "Fascist"), known_to=self.players)
 
         if policy == "L":
             self.pass_liberal()
@@ -792,7 +792,7 @@ class Game(object):
         """
         origin.send_message("<{0}> party affiliation is <{0.party}>".format(target))
         self.global_message("{} has investigated {}".format(origin, target))
-        self.record_log("{} investigated {}".format(origin, target), known_to=self.players)
+        self.record_log("🔎 {} investigated {}".format(origin, target), known_to=self.players)
         self.record_log("{} knows that {} is a {}.".format(origin, target, target.party), known_to=[origin, target])
 
     def deck_peek(self, who, num=3):
@@ -806,7 +806,7 @@ class Game(object):
         spectator_who = {self.president: "President {}", self.chancellor: "Chancellor {}"}.get(who, "{}")
         spectator_who = spectator_who.format(who)
 
-        self.record_log("{} peeks at {}".format(spectator_who, policies), known_to=[self.president, who])
+        self.record_log("🔮 {} peeks at {}".format(spectator_who, policies), known_to=[self.president, who])
 
     def special_elect(self, target):
         """
@@ -819,7 +819,7 @@ class Game(object):
         if target == self.president:
             return False  # cannot special elect self
 
-        self.record_log("{} special elects {}".format(self.president, target), known_to=self.players)
+        self.record_log("👔 {} special elects {}".format(self.president, target), known_to=self.players)
 
         self.last_nonspecial_president = self.president
         self.president = target
@@ -833,7 +833,7 @@ class Game(object):
             Otherwise, this player will be unable to vote, be nominated, or run for president
             for the remainder of the game.
         """
-        self.record_log("{} executed {}!".format(self.president, target), known_to=self.players)
+        self.record_log("🗡 {} executed {}!".format(self.president, target), known_to=self.players)
         if target.role == "Hitler":
             self.end_game("Liberal", "Hitler was killed")
         else:
@@ -862,6 +862,8 @@ class Game(object):
         and raising a GameOverException (must be caught and handled)
         """
         self.global_message("The {} team wins! ({}.)".format(winning_party, reason))
+        if winning_party in ("Liberal", "Fascist"):
+          self.record_log("{} The {} team wins!".format("🕊" if winning_party=="Liberal" else "☠",winning_party), self.players)
         self.set_game_state(GameStates.GAME_OVER)
         raise GameOverException("The {} team wins! ({}.)".format(winning_party, reason))
 
