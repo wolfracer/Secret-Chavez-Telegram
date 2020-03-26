@@ -149,7 +149,7 @@ def nextgame_handler(bot, update, chat_data):
     chat_id = update.message.chat.id
     if update.message.chat.type == "private":
         bot.send_message(chat_id=chat_id, text="You can’t wait for new games in private chat!")
-    if game is not None and game.game_state == secret_hitler.GameStates.ACCEPT_PLAYERS and game.num_players<10 and update.message.text.find("confirm")==-1:
+    if game is not None and game.game_state == secret_hitler.GameStates.ACCEPT_PLAYERS and game.num_players<10 and update.message.from_user.id not in map(lambda player: player.id, game.players) and update.message.text.find("confirm")==-1:
         bot.send_message(chat_id=chat_id, text="You could still join the _current_ game via /joingame. Type '/nextgame confirm' if you really want to wait.", parse_mode=telegram.ParseMode.MARKDOWN)
     else:
         if "{}".format(chat_id) not in waiting_players_per_group:
