@@ -840,6 +840,7 @@ class Game(object):
             self.dead_players.add(target)
             self.num_alive_players -= 1
             self.num_dead_players += 1
+            self.update_termlimits()
 
     def anarchy(self):
         """
