@@ -11,7 +11,7 @@ If you host a bot instance, this files contents can be put into `@BotFather` so 
 
 ## Player Status Abbreviations
 - (P) indicates a current president/presidential candidate.
-- (C) indicates a current president/presidential candidate.
+- (C) indicates a current chancellor/chancellor candidate.
 - (TL) indicates a term-limited player (ineligible for any chancellor nominations).
 - (CNH) indicates a player that is confirmed not to be hitler (by having been elected after 3 fascist policies).
 - (RIP) indicates a dead player.
