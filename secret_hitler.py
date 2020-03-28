@@ -605,6 +605,10 @@ class Game(object):
             self.update_termlimits()
             self.anarchy_progress = 0
         else:
+            # Finish the election state properly and assume that legislating took 0 seconds
+            self.time_logs[-1][GameStates.LEG_PRES] = {self.spectator: 0 + time.time(), self.group: 0 + time.time()}
+            self.time_logs[-1][GameStates.CHANCY_NOMINATION][self.group] = 0 + time.time()
+
             self.anarchy_progress += 1
             if self.anarchy_progress == 3:
                 self.anarchy()
@@ -851,9 +855,6 @@ class Game(object):
         """
         self.record_log("Anarchy!", known_to=self.players)
         self.pass_policy(self.deck.pop(0), on_anarchy=True)
-        # Finish the election state properly and assume that legislating took 0 seconds
-        self.time_logs[-1][GameStates.LEG_PRES] = {self.spectator: 0 + time.time(), self.group: 0 + time.time()}
-        self.time_logs[-1][GameStates.CHANCY_NOMINATION][self.group] = 0 + time.time()
         self.check_reshuffle()
 
         self.termlimited_players.clear()
