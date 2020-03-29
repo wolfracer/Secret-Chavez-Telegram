@@ -403,7 +403,7 @@ def game_command_executor(bot, command, args, from_user, chat_id, chat_data, use
                              text="A game has ended but there are {} more games, so I won’t restart yet".format(
                                  len(existing_games)))
         else:
-            bot.send_message(chat_id=DEV_CHAT_ID, text="A game has ended.")
+            bot.send_message(chat_id=DEV_CHAT_ID, text="A game has ended in {}.".format(bot.get_chat(chat_id).title))
         return
 
 
