@@ -124,7 +124,10 @@ def newgame_handler(bot, update, chat_data):
     if update.message.chat.type == "private":
         bot.send_message(chat_id=chat_id, text="You can’t create a game in a private chat!")
     elif MAINTENANCE_MODE:
-        bot.send_message(chat_id=chat_id, text="A restart has been scheduled. No new games can be created while we wait for the remaining {} to finish.".format("game" if len(existing_games)==1 else "{} games".format(len(existing_games))))
+        currently_active_games = running_games()
+        bot.send_message(chat_id=chat_id,
+                         text="A restart has been scheduled. No new games can be created while we wait for the remaining {} to finish.".format(
+                             "game" if len(currently_active_games) == 1 else "{} games".format(len(currently_active_games))))
     elif game is not None and game.game_state != secret_hitler.GameStates.GAME_OVER and update.message.text.find(
             "confirm") == -1:
         bot.send_message(chat_id=chat_id,
@@ -230,10 +233,14 @@ def restart_handler(bot, update):
     MAINTENANCE_MODE = True
 
     if chat_id == DEV_CHAT_ID and user_id in admin_ids:
-        if len([game for game in existing_games if "{}".format(game) in existing_games and existing_games["{}".format(game)].game_state!=secret_hitler.GameStates.GAME_OVER])>0 and update.message.text.find('confirm')==-1:
-            bot.send_message(chat_id=chat_id, text="{} running game(s) found. Type `/restart confirm` to cancel those games and restart anyway. Otherwise, the bot will restart after {} ended.".format(len(existing_games), "that game has" if len(existing_games)==1 else "those games have"))
+        list_of_active_games = running_games()
+        if len(list_of_active_games) > 0 and update.message.text.find('confirm') == -1:
+            bot.send_message(chat_id=chat_id,
+                             text="{} running game(s) found. Type `/restart confirm` to cancel those games and restart anyway. Otherwise, the bot will restart after {} ended.".format(
+                                 len(list_of_active_games),
+                                 "that game has" if len(existing_games) == 1 else "those games have"))
         else:
-            for game_chat_id in [int(game) for game in existing_games if "{}".format(game) in existing_games and existing_games["{}".format(game)].game_state!=secret_hitler.GameStates.GAME_OVER]:
+            for game_chat_id in [int(game) for game in list_of_active_games]:
                 existing_games["{}".format(game_chat_id)].set_game_state(secret_hitler.GameStates.GAME_OVER)
                 bot.send_message(chat_id=game_chat_id, text="This game has been cancelled. Don’t be sad! Bugfixes and cool new features are coming!")
             # No need to clear the existing_games dict as the bot is shutting down anyway
