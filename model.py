@@ -1,12 +1,16 @@
-from sqlalchemy import *
+from sqlalchemy import Column, Integer, Text, Boolean, ForeignKey, Enum, Table
 from sqlalchemy.orm import relationship
-from sqlalchemy.ext.declarative import *
+from sqlalchemy.ext.declarative import declarative_base
 import enum
 
 Base = declarative_base()
 
 
+# Basic enums
+
 class GameStates(enum.Enum):
+    """Enum for the different states a game can be in."""
+
     ACCEPT_PLAYERS = 1
     CHANCY_NOMINATION = 2
     ELECTION = 3
@@ -20,77 +24,98 @@ class GameStates(enum.Enum):
 
 
 class Policy(enum.Enum):
+    """Enum for a policy, can be either fascist or liberal."""
     F = 1
     L = 2
 
 
 class Party(enum.Enum):
+    """Enum for a party membership, can be either fascist or liberal."""
     PARTY_FASCIST = 1
     PARTY_LIBERAL = 2
 
 
 class Role(enum.Enum):
+    """Enum for a role, can be either fascist, liberal or Hitler."""
     ROLE_FASCIST = 1
     ROLE_LIBERAL = 2
     ROLE_HITLER = 3
 
 
-class Player(Base):
-    __tablename__ = "players"
-
-    id = Column(Integer, primary_key=True)
-    chat = Column(Integer)
-    name = Column(Text, nullable=False)
-
-    game_id = Column(Integer, ForeignKey("games.id"))
-
-    party = Column(Enum(Party))
-    role = Column(Enum(Role))
-
-    spectator = Column(Boolean, default=false)
-
+# Classes for the ORM
 
 class Game(Base):
+    """Main class. An instance represents a single game of Secret Hitler."""
+
     __tablename__ = "games"
 
     id = Column(Integer, primary_key=True)
 
-    chat = Column(Integer, nullable=False)
+    chat = Column(Integer, nullable=False)  # The group chat.
 
-    # players = back populated from Player
+    players = relationship("Player", foreign_keys="[Player.game_id]", back_populates="game")  # The players participating.
 
-    # discards = back populated from Discard
+    spectators = relationship("Spectator", back_populates="game")  # The spectators.
+
+    discards = relationship("Discard", back_populates="game")  # Discarded policies.
 
     president_id = Column(Integer, ForeignKey("players.id"))
-    president = relationship("Player")
-    chancellor_id = Column(Integer, ForeignKey("players.id"))
-    chancellor = relationship("Player")
+    president = relationship("Player", foreign_keys="[Game.president_id]")  # Current president.
 
-    # dummy players used for logs access
-    spectator_id = Column(Integer, ForeignKey("players.id"), default=Player(name="spectators"))
-    spectator = relationship("Player")
-    group_id = Column(Integer, ForeignKey("players.id"), default=Player(name="everyone"))
-    group = relationship("Player")
+    chancellor_id = Column(Integer, ForeignKey("players.id"))
+    chancellor = relationship("Player", foreign_keys="[Game.chancellor_id]")  # Current chancellor.
 
     last_nonspecial_president_id = Column(Integer, ForeignKey("players.id"))
-    last_nonspecial_president = relationship("Player")
+    last_nonspecial_president = relationship("Player", foreign_keys="[Game.last_nonspecial_president_id]")
+
+    time_logs = relationship("TimeLog")
+    logs = relationship("Log")
+
+    votes = relationship("Vote")
 
     vetoable_policy = Column(Enum(Policy))
     president_veto_vote = Column(Boolean)
     chancellor_veto_vote = Column(Boolean)
 
-    num_players = Column(Integer, default=0)
-
-    # votes = back populated from Vote
     liberal = Column(Integer, default=0)
     fascist = Column(Integer, default=0)
     anarchy_progress = Column(Integer, default=0)
 
     state = Column(Enum(GameStates), default=GameStates.ACCEPT_PLAYERS)
 
+log_player_table = Table("association", Base.metadata,
+    Column("log", Integer, ForeignKey("logs.id")),
+    Column("player", Integer, ForeignKey("players.id"))
+)
 
-Player.game = relationship("Game", back_populates="players")  # add game to Player as it can't be added in player itself because Python needs it to be defined *before* usage, lol
+class Player(Base):
+    """Represents a single player in a single game. If a person is in multiple games at the same time, multiple Player instances are needed."""
+    __tablename__ = "players"
 
+    id = Column(Integer, primary_key=True)
+    chat = Column(Integer)
+    name = Column(Text, nullable=False)
+
+    game_id = Column(Integer, ForeignKey("games.id"), nullable=False)
+    game = relationship("Game", foreign_keys=[game_id], back_populates="players")
+
+    party = Column(Enum(Party))
+    role = Column(Enum(Role))
+
+    termlimited = Column(Boolean)
+    confirmed_not_hitler = Column(Boolean)
+    dead = Column(Boolean)
+
+    known_logs = relationship("Log", secondary=log_player_table, back_populates="known_to")
+
+class Spectator(Base):
+    __tablename__ = "spectators"
+
+    id = Column(Integer, primary_key=True)
+    chat = Column(Integer)
+
+    game_id = Column(Integer, ForeignKey("games.id"), nullable=False)
+    game = relationship("Game", back_populates="spectators")
 
 class Discard(Base):
     __tablename__ = "discards"
@@ -113,6 +138,9 @@ class Log(Base):
 
     message = Column(Text, nullable=False)
 
+    # Only lists players, not spectators, they have to be handled seperately
+    known_to = relationship("Player", secondary=log_player_table, back_populates="known_logs")
+    known_to_group = Column(Boolean)
 
 class TimeLog(Base):
     __tablename__ = "time_logs"
@@ -126,14 +154,15 @@ class TimeLog(Base):
 
 
 class Vote(Base):
+    """Represents a single vote."""
     __tablename__ = "votes"
 
     id = Column(Integer, primary_key=True)
+
     game_id = Column(Integer, ForeignKey("games.id"), nullable=False)
     game = relationship("Game", back_populates="votes")
+
     player_id = Column(Integer, ForeignKey("players.id"), nullable=False)
     player = relationship("Player")
+
     vote = Column(Boolean, nullable=False)
-    termlimited = Column(Boolean)
-    confirmed_not_hitler = Column(Boolean)
-    dead = Column(Boolean)
