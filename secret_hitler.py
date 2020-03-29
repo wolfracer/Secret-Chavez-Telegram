@@ -753,7 +753,7 @@ class Game(object):
                 self.check_reshuffle()
                 self.global_message("President {} is examining top 3 policies".format(self.president))
                 self.president.send_message("Top three policies are: ")
-                self.deck_peek(self.president, 3)
+                self.deck_peek(self.president, 3, true)
             elif self.num_players in (7, 8, 9, 10):
                 self.set_game_state(GameStates.SPECIAL_ELECTION)
         elif self.fascist == 4 or self.fascist == 5:
@@ -795,7 +795,7 @@ class Game(object):
         self.record_log("🔎 {} investigated {}".format(origin, target), known_to=self.players)
         self.record_log("{} knows that {} is a {}.".format(origin, target, target.party), known_to=[origin, target])
 
-    def deck_peek(self, who, num=3):
+    def deck_peek(self, who, num=3, asPower=false):
         """
         Sends player `who` a message indicating the top `num` policy tiles.
         """
@@ -806,7 +806,7 @@ class Game(object):
         spectator_who = {self.president: "President {}", self.chancellor: "Chancellor {}"}.get(who, "{}")
         spectator_who = spectator_who.format(who)
 
-        self.record_log("🔮 {} peeks at {}".format(spectator_who, policies), known_to=[self.president, who])
+        self.record_log("{}{} peeks at {}".format("🔮 " if asPower else "",spectator_who, policies), known_to=[self.president, who])
 
     def special_elect(self, target):
         """
