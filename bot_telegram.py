@@ -208,6 +208,11 @@ def leave_handler(bot, update, user_data):
         player.send_message(reply)
 
 
+def running_games():
+    return [game for game in existing_games if "{}".format(game) in existing_games and existing_games[
+        "{}".format(game)].game_state != secret_hitler.GameStates.GAME_OVER]
+
+
 def restart_handler(bot, update):
     """
     Pulls newest code and ends the bot, so that the system daemon can restart it.
