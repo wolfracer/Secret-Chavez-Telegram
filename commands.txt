@@ -8,6 +8,7 @@ newgame - Init new game
 joingame - Join game
 startgame - Start game
 cancelgame - Cancel game
+nextgame - Get a notification when a new game is opened
 spectate - Spectate a running game
 blame - Who is blocking the game
 timelogs - Information on what took how long

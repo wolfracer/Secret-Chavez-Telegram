@@ -7,6 +7,7 @@ import sys
 import time
 import unicodedata
 from enum import Enum
+import functools
 
 from telegram.error import Unauthorized, TelegramError
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ParseMode
@@ -328,6 +329,14 @@ class Game(object):
                     "???" if self.group not in term[GameStates.CHANCY_NOMINATION] or GameStates.LEG_PRES not in term else self.format_time(term[GameStates.CHANCY_NOMINATION][self.group] - term[GameStates.LEG_PRES][self.spectator])
                 )
             ) for index, term in enumerate(self.time_logs)]
+        ) + ("\n{}\n".format(self.show(["-"])))\
+                + "Total Time: {}".format(
+            self.format_time(
+                functools.reduce(
+                    lambda x, y: x+y,
+                    [term[GameStates.CHANCY_NOMINATION][self.group] - term[GameStates.CHANCY_NOMINATION][self.spectator] if index is not (len(self.time_logs)-1) else time.time() - term[GameStates.CHANCY_NOMINATION][self.spectator] for index, term in enumerate(self.time_logs)]
+                )
+            )
         )
 
     # DEBUG
@@ -585,6 +594,10 @@ class Game(object):
             self.update_termlimits()
             self.anarchy_progress = 0
         else:
+            # Finish the election state properly and assume that legislating took 0 seconds
+            self.time_logs[-1][GameStates.LEG_PRES] = {self.spectator: 0 + time.time(), self.group: 0 + time.time()}
+            self.time_logs[-1][GameStates.CHANCY_NOMINATION][self.group] = 0 + time.time()
+
             self.anarchy_progress += 1
             if self.anarchy_progress == 3:
                 self.anarchy()
@@ -684,7 +697,7 @@ class Game(object):
         if we don't need to wait for a decision related to executive power (according to the game_state),
         advances the presidency
         """
-        self.record_log("Enacted: {}".format("💠 Liberal" if policy == "L" else "💢 Fascist"), known_to=self.players)
+        self.record_log("{} Enacted: {}".format("💠" if policy == "L" else "💢", "Liberal" if policy == "L" else "Fascist"), known_to=self.players)
 
         if policy == "L":
             self.pass_liberal()
@@ -733,7 +746,7 @@ class Game(object):
                 self.check_reshuffle()
                 self.global_message("President {} is examining top 3 policies".format(self.president))
                 self.president.send_message("Top three policies are: ")
-                self.deck_peek(self.president, 3)
+                self.deck_peek(self.president, 3, true)
             elif self.num_players in (7, 8, 9, 10):
                 self.set_game_state(GameStates.SPECIAL_ELECTION)
         elif self.fascist == 4 or self.fascist == 5:
@@ -770,12 +783,12 @@ class Game(object):
          - Announces who is investigating whom
          - Sends player their target's party affiliation
         """
-        origin.send_message("<{0}> party affiliation is <{0.party}>".format(target))
+        origin.send_message("{0} is a {0.party}.".format(target))
         self.global_message("{} has investigated {}".format(origin, target))
-        self.record_log("{} investigated {}".format(origin, target), known_to=self.players)
+        self.record_log("🔎 {} investigated {}".format(origin, target), known_to=self.players)
         self.record_log("{} knows that {} is a {}.".format(origin, target, target.party), known_to=[origin, target])
 
-    def deck_peek(self, who, num=3):
+    def deck_peek(self, who, num=3, asPower=false):
         """
         Sends player `who` a message indicating the top `num` policy tiles.
         """
@@ -786,7 +799,7 @@ class Game(object):
         spectator_who = {self.president: "President {}", self.chancellor: "Chancellor {}"}.get(who, "{}")
         spectator_who = spectator_who.format(who)
 
-        self.record_log("{} peeks at {}".format(spectator_who, policies), known_to=[self.president, who])
+        self.record_log("{}{} peeks at {}".format("🔮 " if asPower else "",spectator_who, policies), known_to=[self.president, who])
 
     def special_elect(self, target):
         """
@@ -799,7 +812,7 @@ class Game(object):
         if target == self.president:
             return False  # cannot special elect self
 
-        self.record_log("{} special elects {}".format(self.president, target), known_to=self.players)
+        self.record_log("👔 {} special elects {}".format(self.president, target), known_to=self.players)
 
         self.last_nonspecial_president = self.president
         self.president = target
@@ -813,13 +826,14 @@ class Game(object):
             Otherwise, this player will be unable to vote, be nominated, or run for president
             for the remainder of the game.
         """
-        self.record_log("{} executed {}!".format(self.president, target), known_to=self.players)
+        self.record_log("🗡 {} executed {}!".format(self.president, target), known_to=self.players)
         if target.role == "Hitler":
             self.end_game("Liberal", "Hitler was killed")
         else:
             self.dead_players.add(target)
             self.num_alive_players -= 1
             self.num_dead_players += 1
+            self.update_termlimits()
 
     def anarchy(self):
         """
@@ -842,6 +856,8 @@ class Game(object):
         and raising a GameOverException (must be caught and handled)
         """
         self.global_message("The {} team wins! ({}.)".format(winning_party, reason))
+        if winning_party in ("Liberal", "Fascist"):
+          self.record_log("{} The {} team wins!".format("🕊" if winning_party=="Liberal" else "☠",winning_party), self.players)
         self.set_game_state(GameStates.GAME_OVER)
         raise GameOverException("The {} team wins! ({}.)".format(winning_party, reason))
 
@@ -851,11 +867,15 @@ class Game(object):
         Announce the state change, notify relevant president/chancellor about what they must do.
         """
 
+        # Nothing to do if a non-started game is canceled
+        if new_state == GameStates.GAME_OVER and self.game_state == GameStates.ACCEPT_PLAYERS: return
+
         if self.game_state == new_state and not repeat:
             return  # don't repeat state change unless specifically requested
 
         self.game_state = new_state
         self.reset_blame_ratelimit()
+
         if new_state == GameStates.CHANCY_NOMINATION:
             self.time_logs.append({})
             if len(self.time_logs) > 1:
