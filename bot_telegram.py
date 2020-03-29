@@ -56,6 +56,7 @@ def main():
     dispatcher.add_handler(CommandHandler('newgame', newgame_handler, pass_chat_data=True))
     dispatcher.add_handler(CommandHandler('cancelgame', cancelgame_handler, pass_chat_data=True))
     dispatcher.add_handler(CommandHandler('leave', leave_handler, pass_user_data=True))
+    dispatcher.add_handler(CommandHandler('listgames', listgames_handler))
     dispatcher.add_handler(CommandHandler('restart', restart_handler))
     dispatcher.add_handler(CommandHandler('nextgame', nextgame_handler, pass_chat_data=True))
     dispatcher.add_handler(CommandHandler('joingame', joingame_handler, pass_chat_data=True, pass_user_data=True))
@@ -214,6 +215,23 @@ def leave_handler(bot, update, user_data):
 def running_games():
     return [game for game in existing_games if "{}".format(game) in existing_games and existing_games[
         "{}".format(game)].game_state != secret_hitler.GameStates.GAME_OVER]
+
+
+def listgames_handler(bot, update):
+    """
+    List all groups in which a game is running
+    """
+    user_id = update.message.from_user.id
+    chat_id = update.message.chat.id
+    admins = bot.get_chat_administrators(chat_id)
+    admin_ids = [i.user.id for i in admins]
+
+    if chat_id == DEV_CHAT_ID and user_id in admin_ids:
+        list_of_active_games = running_games()
+        message = "The following groups host a running game"
+        for game_chat_id in [int(game) for game in list_of_active_games]:
+            message += "\n\t- {}".format(bot.get_chat(game_chat_id).title)
+        bot.send_message(chat_id=chat_id,text=message)
 
 
 def restart_handler(bot, update):
