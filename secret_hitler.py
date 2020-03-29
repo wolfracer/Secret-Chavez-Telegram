@@ -878,11 +878,15 @@ class Game(object):
         Announce the state change, notify relevant president/chancellor about what they must do.
         """
 
+        # Nothing to do if a non-started game is canceled
+        if new_state == GameStates.GAME_OVER and self.game_state == GameStates.ACCEPT_PLAYERS: return
+
         if self.game_state == new_state and not repeat:
             return  # don't repeat state change unless specifically requested
 
         self.game_state = new_state
         self.reset_blame_ratelimit()
+
         if new_state == GameStates.CHANCY_NOMINATION:
             self.time_logs.append({})
             if len(self.time_logs) > 1:
