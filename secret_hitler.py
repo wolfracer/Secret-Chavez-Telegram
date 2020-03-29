@@ -278,7 +278,7 @@ class Game(object):
                 else:
                     p.set_role("Liberal")
 
-        self.record_log("ROLES:", known_to=[self.players])
+        self.record_log("ROLES:", known_to=self.players)
         for player in self.players:
             if player.role == "Liberal":
                 self.record_log("{} is {}".format(player, player.role), known_to=[p for p in self.players if p == player or p.role == "Fascist" or (p.role == "Hitler" and len(self.players) <= 6)])
