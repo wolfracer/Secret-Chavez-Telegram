@@ -234,7 +234,7 @@ def leave_handler(bot, update, user_data):
 
 def running_games():
     return [game for game in existing_games if "{}".format(game) in existing_games and existing_games[
-        "{}".format(game)].game_state != secret_hitler.GameStates.GAME_OVER]
+        "{}".format(game)].game_state not in [secret_hitler.GameStates.ACCEPT_PLAYERS, secret_hitler.GameStates.GAME_OVER]]
 
 
 def listgames_handler(bot, update):
