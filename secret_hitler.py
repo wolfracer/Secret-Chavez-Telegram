@@ -799,7 +799,7 @@ class Game(object):
         self.record_log("🔎 {} investigated {}".format(origin, target), known_to=self.players)
         self.record_log("{} knows that {} is a {}.".format(origin, target, target.party), known_to=[origin, target])
 
-    def deck_peek(self, who, num=3, asPower=false):
+    def deck_peek(self, who, num=3, as_power = False):
         """
         Sends player `who` a message indicating the top `num` policy tiles.
         """
@@ -810,7 +810,7 @@ class Game(object):
         spectator_who = {self.president: "President {}", self.chancellor: "Chancellor {}"}.get(who, "{}")
         spectator_who = spectator_who.format(who)
 
-        self.record_log("{}{} peeks at {}".format("🔮 " if asPower else "",spectator_who, policies), known_to=[self.president, who])
+        self.record_log("{}{} peeks at {}".format("🔮 " if as_power else "",spectator_who, policies), known_to=[self.president, who])
 
     def special_elect(self, target):
         """
