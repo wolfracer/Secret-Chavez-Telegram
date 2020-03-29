@@ -823,7 +823,7 @@ class Game(object):
         if target == self.president:
             return False  # cannot special elect self
 
-        self.record_log("👔 {} special elects {}".format(self.president, target), known_to=self.players)
+        self.record_log("👔 {} special elected {}".format(self.president, target), known_to=self.players)
 
         self.last_nonspecial_president = self.president
         self.president = target
