@@ -248,9 +248,9 @@ def listgames_handler(bot, update):
 
     if chat_id == DEV_CHAT_ID and user_id in admin_ids:
         list_of_active_games = running_games()
-        message = "The following groups host a running game"
+        message = "The following groups host a running game:"
         for game_chat_id in [int(game) for game in list_of_active_games]:
-            message += "\n\t- {}".format(bot.get_chat(game_chat_id).title)
+            message += "\n - {}".format(bot.get_chat(game_chat_id).title)
         bot.send_message(chat_id=chat_id,text=message)
 
 
