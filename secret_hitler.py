@@ -757,7 +757,7 @@ class Game(object):
                 self.check_reshuffle()
                 self.global_message("President {} is examining top 3 policies".format(self.president))
                 self.president.send_message("Top three policies are: ")
-                self.deck_peek(self.president, 3, true)
+                self.deck_peek(self.president, 3, True)
             elif self.num_players in (7, 8, 9, 10):
                 self.set_game_state(GameStates.SPECIAL_ELECTION)
         elif self.fascist == 4 or self.fascist == 5:
