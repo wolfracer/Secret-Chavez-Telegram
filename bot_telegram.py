@@ -9,7 +9,7 @@ from subprocess import call
 
 import telegram
 from telegram.error import TelegramError
-from telegram.ext import Updater, CommandHandler, CallbackQueryHandler
+from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, MessageHandler, Filters
 
 import secret_hitler
 
@@ -67,6 +67,8 @@ def main():
     dispatcher.add_handler(CommandHandler('savegame', save_game, pass_chat_data=True, pass_user_data=True))
 
     dispatcher.add_handler(CallbackQueryHandler(button_handler, pass_chat_data=True, pass_user_data=True))
+
+    dispatcher.add_handler(MessageHandler(Filters.animation, animation_handler))
 
     dispatcher.add_error_handler(handle_error)
 
@@ -252,6 +254,19 @@ def listgames_handler(bot, update):
         for game_chat_id in [int(game) for game in list_of_active_games]:
             message += "\n - {}".format(bot.get_chat(game_chat_id).title)
         bot.send_message(chat_id=chat_id,text=message)
+
+
+def animation_handler(bot, update):
+    user_id = update.message.from_user.id
+    chat_id = update.message.chat.id
+    admins = bot.get_chat_administrators(chat_id)
+    admin_ids = [i.user.id for i in admins]
+
+    if chat_id == DEV_CHAT_ID and user_id in admin_ids:
+        bot.send_message(
+            chat_id=chat_id,
+            text="The id of your Animation is '{}'".format(update.message.animation.file_unique_id)
+        )
 
 
 def restart_handler(bot, update):
