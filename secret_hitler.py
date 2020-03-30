@@ -756,6 +756,7 @@ class Game(object):
             if self.num_players in (5, 6):  # EXAMINE
                 self.check_reshuffle()
                 self.global_message("President {} is examining top 3 policies".format(self.president))
+                self.record_log("🔮 President {} is examining top 3 policies".format(self.president), [player for player in self.players if player != self.president] + [self.group])
                 self.president.send_message("Top three policies are: ")
                 self.deck_peek(self.president, 3, True)
             elif self.num_players in (7, 8, 9, 10):
