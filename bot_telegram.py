@@ -144,11 +144,11 @@ def newgame_handler(bot, update, chat_data):
         bot.send_message(chat_id=chat_id, text="Created game! /joingame to join, /startgame to start")
         existing_games["{}".format(chat_id)] = chat_data["game_obj"]
         if "{}".format(chat_id) in waiting_players_per_group:
+            invite_link = bot.export_chat_invite_link(chat_id=chat_id)
             for waiting_player in waiting_players_per_group["{}".format(chat_id)]:
                 bot.send_message(chat_id=int(waiting_player),
                                  text="A new game is starting in [{}]({})!".format(update.message.chat.title,
-                                                                                   bot.export_chat_invite_link(
-                                                                                       chat_id=chat_id)),
+                                                                                   invite_link),
                                  parse_mode=telegram.ParseMode.MARKDOWN)
             del waiting_players_per_group["{}".format(chat_id)]
 
