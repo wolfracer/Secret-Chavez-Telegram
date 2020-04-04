@@ -28,13 +28,6 @@ class Policy(enum.Enum):
     F = 1
     L = 2
 
-
-class Party(enum.Enum):
-    """Enum for a party membership, can be either fascist or liberal."""
-    PARTY_FASCIST = 1
-    PARTY_LIBERAL = 2
-
-
 class Role(enum.Enum):
     """Enum for a role, can be either fascist, liberal or Hitler."""
     ROLE_FASCIST = 1
@@ -99,7 +92,6 @@ class Player(Base):
     game_id = Column(Integer, ForeignKey("games.id"), nullable=False)
     game = relationship("Game", foreign_keys=[game_id], back_populates="players")
 
-    party = Column(Enum(Party))
     role = Column(Enum(Role))
 
     termlimited = Column(Boolean)
@@ -142,6 +134,7 @@ class Log(Base):
     known_to = relationship("Player", secondary=log_player_table, back_populates="known_logs")
     known_to_group = Column(Boolean)
 
+""" TODO Implement time logs
 class TimeLog(Base):
     __tablename__ = "time_logs"
 
@@ -150,8 +143,8 @@ class TimeLog(Base):
     game_id = Column(Integer, ForeignKey("games.id"), nullable=False)
     game = relationship("Game", back_populates="time_logs")
 
-    # TODO time_logs :: [ GameState -> (Player -> timestamp) ]
-
+    # time_logs : List<Map<GameState, Map<Player,Timestamp>>>
+"""
 
 class Vote(Base):
     """Represents a single vote."""
