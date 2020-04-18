@@ -8,7 +8,7 @@ Base = declarative_base()
 
 # Basic enums
 
-class GameStates(enum.Enum):
+class GameState(enum.Enum):
     """Enum for the different states a game can be in."""
 
     ACCEPT_PLAYERS = 1
@@ -39,17 +39,23 @@ class Role(enum.Enum):
 
 class Game(Base):
     """Main class. An instance represents a single game of Secret Hitler."""
-
     __tablename__ = "games"
+
+    def __init__(self, chat_id):
+        self.chat_id = chat_id
+
+    def num_players(self):
+        return(len(self.players))
 
     id = Column(Integer, primary_key=True)
 
-    chat = Column(Integer, nullable=False)  # The group chat.
+    chat_id = Column(Integer, nullable=False)  # The group chat.
 
     players = relationship("Player", foreign_keys="[Player.game_id]", back_populates="game")  # The players participating.
 
     spectators = relationship("Spectator", back_populates="game")  # The spectators.
 
+    cards = relationship("Card", back_populates="game")  # Cards on the deck.
     discards = relationship("Discard", back_populates="game")  # Discarded policies.
 
     president_id = Column(Integer, ForeignKey("players.id"))
@@ -70,11 +76,11 @@ class Game(Base):
     president_veto_vote = Column(Boolean)
     chancellor_veto_vote = Column(Boolean)
 
-    liberal = Column(Integer, default=0)
-    fascist = Column(Integer, default=0)
+    liberal_policies = Column(Integer, default=0)
+    fascist_policies = Column(Integer, default=0)
     anarchy_progress = Column(Integer, default=0)
 
-    state = Column(Enum(GameStates), default=GameStates.ACCEPT_PLAYERS)
+    state = Column(Enum(GameState), default=GameState.ACCEPT_PLAYERS)
 
 log_player_table = Table("association", Base.metadata,
     Column("log", Integer, ForeignKey("logs.id")),
@@ -84,6 +90,13 @@ log_player_table = Table("association", Base.metadata,
 class Player(Base):
     """Represents a single player in a single game. If a person is in multiple games at the same time, multiple Player instances are needed."""
     __tablename__ = "players"
+
+    def __init__(self, chat_id, name):
+        self.chat_id = chat_id
+        self.name = name
+
+    def __str__(self):
+        return self.name
 
     id = Column(Integer, primary_key=True)
     chat = Column(Integer)
@@ -108,6 +121,16 @@ class Spectator(Base):
 
     game_id = Column(Integer, ForeignKey("games.id"), nullable=False)
     game = relationship("Game", back_populates="spectators")
+
+class Card(Base):
+    __tablename__ = "cards"
+
+    id = Column(Integer, primary_key=True)
+
+    game_id = Column(Integer, ForeignKey("games.id"), nullable=False)
+    game = relationship("Game", back_populates="discards")
+
+    policy = Column(Enum(Policy))
 
 class Discard(Base):
     __tablename__ = "discards"
