@@ -27,14 +27,8 @@ def strip_non_printable(s):
     return non_printable_regex.sub('', s)
 
 
-# /Fix for #14
-
-
-markdown_regex = re.compile(".*((\[.*\]\(.*\))|\*|_|`).*")
-
 with open("config/username", "r") as f:
     BOT_USERNAME = f.read().rstrip()
-BLAME_RATELIMIT = 69  # seconds
 TESTING = (__name__ == "__main__")  # test whenever this file is run directly
 # set TESTING to True to simulate a game locally
 if not TESTING:

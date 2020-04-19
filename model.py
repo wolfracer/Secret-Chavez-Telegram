@@ -11,16 +11,16 @@ Base = declarative_base()
 class GameState(enum.Enum):
     """Enum for the different states a game can be in."""
 
-    ACCEPT_PLAYERS = 1
-    CHANCY_NOMINATION = 2
-    ELECTION = 3
-    LEG_PRES = 4
-    LEG_CHANCY = 5
-    VETO_CHOICE = 6
-    INVESTIGATION = 7
-    SPECIAL_ELECTION = 8
-    EXECUTION = 9
-    GAME_OVER = 10
+    ACCEPT_PLAYERS = 1  # Game has not started yet and is accepting player entries.
+    CHANCY_NOMINATION = 2  # The president has to nominate a chancellor.
+    ELECTION = 3  # There is an ongoing election.
+    LEG_PRES = 4  # Game is currently waiting on the president to discard a policy.
+    LEG_CHANCY = 5  # The chancellor has to nominate a chancellor.
+    VETO_CHOICE = 6  # Waiting on a veto decision.
+    INVESTIGATION = 7  # The president has to decide which player to investigate.
+    SPECIAL_ELECTION = 8  # Waiting for the president to pick a player for a special election.
+    EXECUTION = 9  # The president has to choose a player to execute.
+    GAME_OVER = 10  # The game has finished.
 
 
 class Policy(enum.Enum):
@@ -43,9 +43,6 @@ class Game(Base):
 
     def __init__(self, chat_id):
         self.chat_id = chat_id
-
-    def num_players(self):
-        return(len(self.players))
 
     id = Column(Integer, primary_key=True)
 

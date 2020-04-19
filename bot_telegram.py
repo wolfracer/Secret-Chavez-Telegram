@@ -149,7 +149,7 @@ def nextgame_handler(bot, update, chat_data):
     chat_id = update.message.chat.id
     if update.message.chat.type == "private":
         bot.send_message(chat_id=chat_id, text="You can’t wait for new games in private chat!")
-    if game is not None and game.game_state == secret_hitler.GameStates.ACCEPT_PLAYERS and game.num_players<10 and update.message.from_user.id not in map(lambda player: player.id, game.players) and update.message.text.find("confirm")==-1:
+    if game is not None and game.game_state == secret_hitler.GameState.ACCEPT_PLAYERS and game.num_players<10 and update.message.from_user.id not in map(lambda player: player.id, game.players) and update.message.text.find("confirm")==-1:
         bot.send_message(chat_id=chat_id, text="You could still join the _current_ game via /joingame. Type '/nextgame confirm' if you really want to wait.", parse_mode=telegram.ParseMode.MARKDOWN)
     else:
         if "{}".format(chat_id) not in waiting_players_per_group:
@@ -383,25 +383,6 @@ def handle_error(bot, update, error):
         raise error
     except TelegramError:
         logging.getLogger(__name__).warning('TelegramError! %s caused by this update: %s', error, update)
-
-
-def save_game(bot, update, chat_data, user_data):
-    game = None
-    if "game_obj" in list(chat_data.keys()):
-        game = chat_data["game_obj"]
-    elif "player_obj" in list(user_data.keys()):
-        game = user_data["player_obj"].game
-
-    if game is not None:
-        fname = "ignore/aborted_game.p"
-        i = 0
-        while os.path.exists(fname):
-            fname = "ignore/aborted_game_{}.p".format(i)
-            i += 1  # ensures multiple games can be saved
-
-        game.save(fname)
-        bot.send_message(chat_id=update.message.chat_id,
-                         text="Saved game in current state as '{}'".format(fname))
 
 
 if __name__ == "__main__":

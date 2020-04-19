@@ -1,10 +1,25 @@
 import random
+import time
+import re
+from model import Game, GameState
 
-def reset_blame_ratelimit(self):
-    self.last_blame = time.time() - BLAME_RATELIMIT
+BLAME_RATELIMIT = 69  # Minimum seconds between blames.
 
 
-def show_game(game, things_to_show=None):
+def num_players(game: Game):
+    return(len(game.players))
+
+def num_players_alive(game: Game):
+    return(len(filter(lambda player : not player.dead, game.players)))
+
+def num_players_dead(game: Game):
+    return(len(filter(lambda player : player.dead, game.players)))
+
+def reset_blame_ratelimit(game):
+    game.last_blame = time.time() - BLAME_RATELIMIT
+
+
+def show_game(game: Game, things_to_show=None):
     """
     Builds a textual representation of selected board stats,
     including:
@@ -26,7 +41,7 @@ def show_game(game, things_to_show=None):
     to_show, rest = things_to_show[0], things_to_show[1:]
     if to_show == "liberal":
         message = "— Liberal Track —\n" + " ".join(
-            ["✖️", "✖️", "✖️", "✖️", "✖️"][:self.liberal] + ["◻️", "◻️", "◻️", "◻️", "🕊"][self.liberal - 5:])
+            ["✖️", "✖️", "✖️", "✖️", "✖️"][:game.liberal_policies] + ["◻️", "◻️", "◻️", "◻️", "🕊"][game.liberal_policies - 5:])
     elif to_show == "fascist":
         fascist_track = ["◻️", "◻️", "🔮", "🗡", "🗡", "☠️"]
         if game.num_players > 6:
@@ -38,10 +53,10 @@ def show_game(game, things_to_show=None):
             ["✖️", "✖️", "✖️", "✖️", "✖️", "✖️"][:game.fascist_policies] + fascist_track[game.fascist_policies - 6:])
     elif to_show == "anarchy":
         message = "— Anarchy Track —\n" + " ".join(
-            ["✖️", "✖️", "✖️"][:game.anarchy_progress] + ["◻️", "◻️", "◻️"][:3 - self.anarchy_progress])
+            ["✖️", "✖️", "✖️"][:game.anarchy_progress] + ["◻️", "◻️", "◻️"][:3 - game.anarchy_progress])
     elif to_show == "players":
         message = "— Presidential Order —\n" + " ➡️ ".join(
-            [player.name for player in self.players if not player.dead]) + " 🔁"
+            [player.name for player in game.players if not player.dead]) + " 🔁"
     elif to_show == "deck_stats":
         message = "There are {} policies left in the draw pile, {} in the discard pile.".format(
             len(game.cards), len(game.discards))
@@ -61,7 +76,7 @@ def show_game(game, things_to_show=None):
         message += "\n" + show_game(game, rest)
     return message
 
-def start_game(self):
+def start_game(game: Game):
     """
     Starts a game:
     - assign all players roles
@@ -69,38 +84,35 @@ def start_game(self):
     - begin presidential rotation with the first presidnet nominating their chancellor
     """
 
-    random.shuffle(self.players)  # randomize seating order
-    self.global_message("Randomized seating order:\n" + self.list_players())
+    random.shuffle(game.players)  # randomize seating order
+    game.global_message("Randomized seating order:\n" + self.list_players())
 
-    self.num_players = len(self.players)
-    self.num_alive_players = self.num_players
-    self.num_dead_players = 0
-    self.reset_blame_ratelimit()
+    game.reset_blame_ratelimit()
 
-    if TESTING:
+    if False: # TESTING:
         roles = ["Liberal", "Fascist", "Liberal", "Hitler", "Liberal", "Liberal", "Fascist", "Liberal", "Fascist",
                     "Liberal"]
         for i in range(len(self.players)):
             self.players[i].set_role(roles[i])
             # NOTE: testing configuration does not "notify" fascists of night-phase info (if this breaks, it'll be apparent pretty quickly)
     else:
-        if self.num_players == 5 or self.num_players == 6:  # 1F + H
-            fascists = random.sample(self.players, 2)
-        elif self.num_players == 7 or self.num_players == 8:  # 2F + H
-            fascists = random.sample(self.players, 3)
-        elif self.num_players == 9 or self.num_players == 10:  # 3F + H
-            fascists = random.sample(self.players, 4)
+        if game.num_players == 5 or game.num_players == 6:  # 1F + H
+            fascists = random.sample(game.players, 2)
+        elif game.num_players == 7 or game.num_players == 8:  # 2F + H
+            fascists = random.sample(game.players, 3)
+        elif game.num_players == 9 or game.num_players == 10:  # 3F + H
+            fascists = random.sample(game.players, 4)
         else:
             raise Exception("Invalid number of players")
 
-        for p in self.players:
+        for p in game.players:
             if p == fascists[0]:
                 p.set_role("Hitler")
-                if self.num_players <= 6:
+                if game.num_players <= 6:
                     p.send_message("Fascist: {}".format(fascists[1]))
             elif p in fascists:
                 p.set_role("Fascist")
-                if self.num_players <= 6:
+                if game.num_players <= 6:
                     p.send_message("Hitler: {}".format(fascists[0]))
                 else:
                     p.send_message("Other Fascist{}: {}\nHitler: {}".format("s" if len(fascists) > 3 else "",
@@ -111,23 +123,23 @@ def start_game(self):
             else:
                 p.set_role("Liberal")
 
-    self.record_log("ROLES:", known_to=[self.players])
-    for player in self.players:
+    game.record_log("ROLES:", known_to=[game.players])
+    for player in game.players:
         if player.role == "Liberal":
-            self.record_log("{} is {}".format(player, player.role), known_to=[p for p in self.players if p == player or p.role == "Fascist" or (p.role == "Hitler" and len(self.players) <= 6)])
+            game.record_log("{} is {}".format(player, player.role), known_to=[p for p in game.players if p == player or p.role == "Fascist" or (p.role == "Hitler" and len(self.players) <= 6)])
         elif player.role == "Fascist":
-            self.record_log("{} is {}".format(player, player.role), known_to=[p for p in self.players if p.role == "Fascist" or (p.role == "Hitler" and len(self.players) <= 6)])
+            game.record_log("{} is {}".format(player, player.role), known_to=[p for p in game.players if p.role == "Fascist" or (p.role == "Hitler" and len(self.players) <= 6)])
         else:
-            self.record_log("{} is {}".format(player, player.role), known_to=[p for p in self.players if p.party == "Fascist"])
+            game.record_log("{} is {}".format(player, player.role), known_to=[p for p in game.players if p.party == "Fascist"])
 
-    self.president = self.players[0]
-    self.set_game_state(GameState.CHANCY_NOMINATION)
+    game.president = game.players[0]
+    game.set_game_state(GameState.CHANCY_NOMINATION)
 
 def global_message(self, msg, supress_errors=True, reply_markup=None):
     """
     Send a message to all players using the chat specified in the constructor.
     """
-    if TESTING:
+    if False: # TESTING:
         print("[ Message for everyone ]\n{}".format(msg))
     else:
         try:
@@ -254,15 +266,15 @@ def check_name(self, name, current_player=None):
     or name.endswith("(RIP)") \
     or name.endswith("(CNH)"):
         return "Error: names cannot spoof the annotations from /listplayers"
+    markdown_regex = re.compile(r".*((\[.*\]\(.*\))|\*|_|`).*")
     if markdown_regex.match(name):
         return "Error: names cannot contain markdown characters"
     for p in self.players:
         if p != current_player and p.name.lower() == name.lower():
             return "Error: name '{}' is already taken".format(name)
-
     return None
 
-def list_players(self):
+def list_players(game):
     """
     List all players (separated by newlines) with their indices and annotations:
     (P) indicates a president/presidential candidate
@@ -274,17 +286,17 @@ def list_players(self):
     ret = ""
     for i in range(len(self.players)):
         status = ""
-        if self.players[i] == self.president:
+        if game.players[i] == game.president:
             status += " (P)"
-        if self.players[i] == self.chancellor:
+        if game.players[i] == game.chancellor:
             status += " (C)"
-        if self.players[i] in self.termlimited_players:
+        if game.players[i] in game.termlimited_players:
             status += " (TL)"
-        if self.players[i] in self.dead_players:
+        if game.players[i] in game.dead_players:
             status += " (RIP)"
-        if self.players[i] in self.confirmed_not_hitlers:
+        if game.players[i] in game.confirmed_not_hitlers:
             status += " (CNH)"
-        ret += "({}) {}{}\n".format(i + 1, self.players[i], status)
+        ret += "({}) {}{}\n".format(i + 1, game.players[i], status)
 
     return ret
 
@@ -462,7 +474,7 @@ def president_legislate(self, discard):
         self.deck.remove(discard)
         self.discard.append(discard)
         self.time_logs[-1][self.game_state][self.president] = 0 + time.time()
-        self.set_game_state(GameStates.LEG_CHANCY)
+        self.set_game_state(GameState.LEG_CHANCY)
         return True
     else:
         return False
@@ -480,7 +492,7 @@ def chancellor_legislate(self, enact):
 
         if self.fascist == 5:
             self.vetoable_polcy = enact
-            self.set_game_state(GameStates.VETO_CHOICE)
+            self.set_game_state(GameState.VETO_CHOICE)
         else:
             self.pass_policy(enact)
         return True
