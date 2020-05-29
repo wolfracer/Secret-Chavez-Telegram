@@ -1026,6 +1026,51 @@ class Game(object):
                         return "Successfully changed name to '{}'".format(new_name)
             else:
                 return "Must be in game to change nickname"
+        elif command == "claim":
+            if from_player in self.players:
+                if args == "" or args in ["FFF", "FFL", "FLF", "LFF", "FLL", "LFL", "LLF", "LLL", "FF", "FL", "LF", "LL"]:
+                    return "Must specify claim like this: `/claim FFL` (read from left to right as: “I discarded F, my chancellor discarded F, and we enacted an L together.”)"
+                elif len(args) == 3:
+                    # Find the first legislation where from_player was president and didn’t issue a claim
+                    potential_index = -1
+                    for index, (log_line, known_to) in enumerate(self.logs):
+                        if log_line.startsWith("President "+from_player.name+" peeks"):
+                            potential_index = index
+                        elif log_line.startsWith("Chancellor") and index == potential_index + 1:
+                            self.record_log("President {} claims {} ↦ {}".format(player.name, args, args[1:]), known_to=[from_player], position=index)
+                            if len(self.logs) > index + 1 and self.logs[index+1].startsWith("Chancellor"):
+                                chancellor_claim = self.logs[index+1][-6:][0:2]
+                                if args[1:] != chancellor_claim:
+                                    self.record_log("💥 Discrepancy!", known_to=[self.spectator], position=index+3)
+                            break
+                        else:
+                            potential_index = -1
+                    if potential_index == -1:
+                        return "There is no unclaimed presidency for player {}!".format(from_player.name)
+                    else:
+                        return "Your claim was logged."
+                if len(args) == 2:
+                    # Find the first legislation where from_player was chancellor and didn’t issue a claim
+                    potential_index = -1
+                    for index, (log_line, known_to) in enumerate(self.logs):
+                        if log_line.startsWith("Chancellor "+from_player.name+" peeks"):
+                            potential_index = index
+                        elif ("Enacted" in log_line or "Veto" in log_line) and index == potential_index + 1:
+                            self.record_log("Chancellor {} claims {} ↦ {}".format(player.name, args, args[1:]), known_to=[from_player], position=index)
+                            if "claims" in self.logs[index-2]:
+                                president_claim = self.logs[index-2][-2:]
+                                if args != president_claim:
+                                    self.record_log("💥 Discrepancy!", known_to=[self.spectator], position=index+1)
+                            break
+                        else:
+                            potential_index = -1
+                    if potential_index == -1:
+                        return "There is no unclaimed chancellorship for player {}!".format(from_player.name)
+                    else:
+                        return "Your claim was logged."
+                else:
+                    return "That does not look like a valid claim."
+
         elif command == "spectate":
             if from_player in self.players and from_player not in self.dead_players:
                 return "Error: you cannot spectate a game you're in. Please /leave to spectate."
