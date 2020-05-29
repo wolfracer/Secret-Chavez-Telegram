@@ -316,6 +316,14 @@ class Game(object):
         if self.group not in known_to:  # non-public knowledge, so spectators are informed explicitly
             for p in self.spectators:
                 p.send_message(msg)
+        # If a legislation ends or if claims were added to a retroactively added to a finished legislation, reveal corresponding claims
+        if "Enacted" in msg or "Veto" in msg or "claims" in msg:
+            enactment_found = False
+            for index, (message, known_to) in reversed(enumerate(self.logs)):
+                if "Enacted" in message or "Veto" in message:
+                    enactment_found = True
+                if enactment_found and ("claims" in message or "Discrepancy") in message:
+                    known_to.extend(self.players + [self.group])
 
     def show_logs(self, include_knowledge_of=None):
         return "Logs for {}:\n".format(", ".join([player.name for player in include_knowledge_of]))+"\n".join([info for info, known_to in self.logs if len([player for player in include_knowledge_of if player in known_to]) > 0])
