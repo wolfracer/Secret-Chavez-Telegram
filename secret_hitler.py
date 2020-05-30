@@ -1045,7 +1045,7 @@ class Game(object):
                         if log_line.startsWith("President "+from_player.name+" peeks"):
                             potential_index = index
                         elif log_line.startsWith("Chancellor") and index == potential_index + 1:
-                            self.record_log("President {} claims {} ↦ {}".format(player.name, args, args[1:]), known_to=[from_player], position=index)
+                            self.record_log("President {} claims {} ↦ {}".format(from_player.name, args, args[1:]), known_to=[from_player], position=index)
                             if len(self.logs) > index + 1 and self.logs[index+1].startsWith("Chancellor"):
                                 chancellor_claim = self.logs[index+1][-6:][0:2]
                                 if args[1:] != chancellor_claim:
