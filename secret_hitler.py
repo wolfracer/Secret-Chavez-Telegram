@@ -306,13 +306,16 @@ class Game(object):
                 else:
                     raise e
 
-    def record_log(self, msg, known_to=None, position=len(self.logs.size)):
+    def record_log(self, msg, known_to=None, position=-1):
         if known_to is None or known_to == self.players:
             known_to = self.players + [self.group]
         if self.spectator not in known_to:  # spectators always see everything
             known_to.append(self.spectator)
 
-        self.logs.insert(position, (msg, known_to))
+        if position >= 0:
+            self.logs.insert(position, (msg, known_to))
+        else:
+            self.logs.append((msg, known_to))
         if self.group not in known_to:  # non-public knowledge, so spectators are informed explicitly
             for p in self.spectators:
                 p.send_message(msg)
