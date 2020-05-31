@@ -320,12 +320,12 @@ class Game(object):
             for p in self.spectators:
                 p.send_message(msg)
         # If a legislation ends or if claims were added to a retroactively added to a finished legislation, reveal corresponding claims
-        if "Enacted" in msg or "Veto" in msg or "claims" in msg:
+        if ("Enacted" in msg) or ("Veto" in msg) or ("claims" in msg):
             enactment_found = False
             for message, known_to in reversed(self.logs):
-                if "Enacted" in message or "Veto" in message:
+                if ("Enacted" in message) or ("Veto" in message):
                     enactment_found = True
-                if enactment_found and ("claims" in message or "Discrepancy" in message) in message:
+                if enactment_found and (("claims" in message) or ("Discrepancy" in message)) in message:
                     known_to.extend(self.players + [self.group])
 
     def show_logs(self, include_knowledge_of=None):
@@ -1048,9 +1048,9 @@ class Game(object):
                     for index, (log_line, known_to) in enumerate(self.logs):
                         if log_line.startsWith("President "+from_player.name+" peeks"):
                             potential_index = index
-                        elif log_line.startsWith("Chancellor") and index == potential_index + 1:
+                        elif log_line.startsWith("Chancellor") and (index == potential_index + 1):
                             self.record_log("President {} claims {} ↦ {}".format(from_player.name, args, args[1:]), known_to=[from_player], position=index)
-                            if len(self.logs) > index + 1 and self.logs[index+1].startsWith("Chancellor"):
+                            if (len(self.logs) > index + 1) and self.logs[index+1].startsWith("Chancellor"):
                                 chancellor_claim = self.logs[index+1][-6:][0:2]
                                 if args[1:] != chancellor_claim:
                                     self.record_log("💥 Discrepancy!", known_to=[self.spectator], position=index+3)
@@ -1067,7 +1067,7 @@ class Game(object):
                     for index, (log_line, known_to) in enumerate(self.logs):
                         if log_line.startsWith("Chancellor "+from_player.name+" peeks"):
                             potential_index = index
-                        elif ("Enacted" in log_line or "Veto" in log_line) and index == potential_index + 1:
+                        elif (("Enacted" in log_line) or ("Veto" in log_line)) and (index == potential_index + 1):
                             self.record_log("Chancellor {} claims {} ↦ {}".format(from_player.name, args, args[1:]), known_to=[from_player], position=index)
                             if "claims" in self.logs[index-2]:
                                 president_claim = self.logs[index-2][-2:]
@@ -1084,7 +1084,7 @@ class Game(object):
                     return "That does not look like a valid claim."
 
         elif command == "spectate":
-            if from_player in self.players and from_player not in self.dead_players:
+            if (from_player in self.players) and (from_player not in self.dead_players):
                 return "Error: you cannot spectate a game you're in. Please /leave to spectate."
             elif from_player in self.spectators:
                 return "Error: you are already spectating. /unspectate to stop."
