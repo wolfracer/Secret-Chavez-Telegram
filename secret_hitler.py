@@ -1040,7 +1040,7 @@ class Game(object):
                 return "Must be in game to change nickname"
         elif command == "claim":
             if from_player in self.players:
-                if args == "" or args in ["FFF", "FFL", "FLF", "LFF", "FLL", "LFL", "LLF", "LLL", "FF", "FL", "LF", "LL"]:
+                if args not in ["FFF", "FFL", "FLF", "LFF", "FLL", "LFL", "LLF", "LLL", "FF", "FL", "LF", "LL"]:
                     return "Must specify claim like this: `/claim FFL` (read from left to right as: “I discarded F, my chancellor discarded F, and we enacted an L together.”)"
                 elif len(args) == 3:
                     # Find the first legislation where from_player was president and didn’t issue a claim
