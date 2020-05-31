@@ -1007,7 +1007,7 @@ class Game(object):
     ACCEPTED_COMMANDS = ("listplayers", "changename", "startgame",
                          "boardstats", "deckstats", "anarchystats", "blame", "ja", "nein",
                          "nominate", "kill", "investigate", "enact", "discard", "whois",
-                         "spectate", "unspectate", "logs", "timelogs")
+                         "spectate", "unspectate", "logs", "timelogs", "claim")
 
     def handle_message(self, chat_id, from_player, command, args=""):
         """
