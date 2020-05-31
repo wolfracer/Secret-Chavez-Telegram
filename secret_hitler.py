@@ -325,7 +325,7 @@ class Game(object):
             for message, known_to in reversed(self.logs):
                 if ("Enacted" in message) or ("Veto" in message):
                     enactment_found = True
-                if enactment_found and (("claims" in message) or ("Discrepancy" in message)) in message:
+                if enactment_found and (("claims" in message) or ("Discrepancy" in message)):
                     known_to.extend(self.players + [self.group])
 
     def show_logs(self, include_knowledge_of=None):
