@@ -1046,11 +1046,11 @@ class Game(object):
                     # Find the first legislation where from_player was president and didn’t issue a claim
                     potential_index = -1
                     for index, (log_line, known_to) in enumerate(self.logs):
-                        if log_line.startsWith("President "+from_player.name+" peeks"):
+                        if log_line.startswith("President "+from_player.name+" peeks"):
                             potential_index = index
-                        elif log_line.startsWith("Chancellor") and (index == potential_index + 1):
+                        elif log_line.startswith("Chancellor") and (index == potential_index + 1):
                             self.record_log("President {} claims {} ↦ {}".format(from_player.name, args, args[1:]), known_to=[from_player], position=index)
-                            if (len(self.logs) > index + 1) and self.logs[index+1].startsWith("Chancellor"):
+                            if (len(self.logs) > index + 1) and self.logs[index+1].startswith("Chancellor"):
                                 chancellor_claim = self.logs[index+1][-6:][0:2]
                                 if args[1:] != chancellor_claim:
                                     self.record_log("💥 Discrepancy!", known_to=[self.spectator], position=index+3)
@@ -1065,7 +1065,7 @@ class Game(object):
                     # Find the first legislation where from_player was chancellor and didn’t issue a claim
                     potential_index = -1
                     for index, (log_line, known_to) in enumerate(self.logs):
-                        if log_line.startsWith("Chancellor "+from_player.name+" peeks"):
+                        if log_line.startswith("Chancellor "+from_player.name+" peeks"):
                             potential_index = index
                         elif (("Enacted" in log_line) or ("Veto" in log_line)) and (index == potential_index + 1):
                             self.record_log("Chancellor {} claims {} ↦ {}".format(from_player.name, args, args[1:]), known_to=[from_player], position=index)
