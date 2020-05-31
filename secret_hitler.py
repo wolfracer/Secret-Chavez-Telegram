@@ -1050,8 +1050,8 @@ class Game(object):
                             potential_index = index
                         elif log_line.startswith("Chancellor") and (index == potential_index + 1):
                             self.record_log("President {} claims {} ↦ {}".format(from_player.name, args, args[1:]), known_to=[from_player], position=index)
-                            if (len(self.logs) > index + 1) and self.logs[index+1][0].startswith("Chancellor"):
-                                chancellor_claim = self.logs[index+1][0][-6:][0:2]
+                            if (len(self.logs) > index + 2) and self.logs[index+2][0].startswith("Chancellor"):
+                                chancellor_claim = self.logs[index+2][0][-6:][0:2]
                                 if args[1:] != chancellor_claim:
                                     self.record_log("💥 Discrepancy!", known_to=[self.spectator], position=index+3)
                             break
