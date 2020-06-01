@@ -1053,8 +1053,9 @@ class Game(object):
                             self.record_log("President {} claims {} ↦ {}".format(from_player.name, args, args[1:]), known_to=[from_player], position=index)
                             if (len(self.logs) > index + 2) and self.logs[index+2][0].startswith("Chancellor"):
                                 chancellor_claim = self.logs[index+2][0][-6:][0:2]
-                                print("[Discrepancy Check (P): {}/{} vs {}]".format("".join(sorted(args)),"".join(sorted(args[1:])), "".join(sorted(chancellor_claim))))
+                                print("[Discrepancy Check (P)] {}/{} vs {}".format("".join(sorted(args)),"".join(sorted(args[1:])), "".join(sorted(chancellor_claim))))
                                 if "".join(sorted(args[1:])) != "".join(sorted(chancellor_claim)):
+                                    print("[Discrepancy Check (P)] YES")
                                     self.record_log("💥 Discrepancy!", known_to=[self.spectator], position=index+3)
                             break
                         else:
@@ -1073,8 +1074,9 @@ class Game(object):
                             self.record_log("Chancellor {} claims {} ↦ {}".format(from_player.name, args, args[1:]), known_to=[from_player], position=index)
                             if "claims" in self.logs[index-2][0]:
                                 president_claim = self.logs[index-2][0][-2:]
-                                print("[Discrepancy Check (C): {}/{} vs {}]".format("".join(sorted(president_claim)),"".join(sorted(president_claim[1:])), "".join(sorted(args))))
+                                print("[Discrepancy Check (C)] {}/{} vs {}".format("".join(sorted(president_claim)),"".join(sorted(president_claim[1:])), "".join(sorted(args))))
                                 if "".join(sorted(args)) != "".join(sorted(president_claim[1:])):
+                                    print("[Discrepancy Check (C)] YES")
                                     self.record_log("💥 Discrepancy!", known_to=[self.spectator], position=index+1)
                             break
                         else:
