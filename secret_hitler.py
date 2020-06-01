@@ -1040,6 +1040,7 @@ class Game(object):
                 return "Must be in game to change nickname"
         elif command == "claim":
             if from_player in self.players:
+                args = args.upper()
                 if args not in ["FFF", "FFL", "FLF", "LFF", "FLL", "LFL", "LLF", "LLL", "FF", "FL", "LF", "LL"]:
                     return "Must specify claim like this: `/claim FFL` (read from left to right as: “I discarded F, my chancellor received FL.”) or `claim FL` (read as: “I received FL and discarded F”)."
                 elif len(args) == 3:
