@@ -1071,7 +1071,7 @@ class Game(object):
                             self.record_log("Chancellor {} claims {} ↦ {}".format(from_player.name, args, args[1:]), known_to=[from_player], position=index)
                             if "claims" in self.logs[index-2][0]:
                                 president_claim = self.logs[index-2][0][-2:]
-                                if args != president_claim:
+                                if args != president_claim[1:]:
                                     self.record_log("💥 Discrepancy!", known_to=[self.spectator], position=index+1)
                             break
                         else:
