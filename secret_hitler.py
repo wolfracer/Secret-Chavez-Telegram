@@ -320,7 +320,7 @@ class Game(object):
             for p in self.spectators:
                 p.send_message(msg)
         # If a legislation ends or if claims were added to a retroactively added to a finished legislation, reveal corresponding claims
-        if ("Enacted" in msg) or ("Veto" in msg) or ("claims" in msg):
+        if ("Enacted" in msg) or ("Veto" in msg) or ("claims" in msg) or ("Discrepancy" in msg):
             enactment_found = False
             for message, known_to in reversed(self.logs):
                 if ("Enacted" in message) or ("Veto" in message):
