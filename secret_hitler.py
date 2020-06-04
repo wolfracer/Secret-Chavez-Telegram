@@ -1075,7 +1075,7 @@ class Game(object):
                             if "claims" in self.logs[index-2][0]:
                                 president_claim = self.logs[index-2][0][-2:]
                                 print("[Discrepancy Check (C)] {}/{} vs {}".format("".join(sorted(president_claim)),"".join(sorted(president_claim[1:])), "".join(sorted(args))))
-                                if "".join(sorted(args)) != "".join(sorted(president_claim[1:])):
+                                if "".join(sorted(args)) != "".join(sorted(president_claim)):
                                     print("[Discrepancy Check (C)] YES")
                                     self.record_log("💥 Discrepancy!", known_to=[self.spectator], position=index+1)
                             break
