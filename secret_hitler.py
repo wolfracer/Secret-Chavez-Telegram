@@ -1045,7 +1045,7 @@ class Game(object):
                     return "Must specify claim like this: `/claim FFL` (read from left to right as: “I discarded F, my chancellor received FL.”) or `claim FL` (read as: “I received FL and discarded F”)."
                 elif len(args) == 3:
                     # Find the first legislation where from_player was president and didn’t issue a claim
-                    potential_index = -1
+                    potential_index = -2
                     for index, (log_line, known_to) in enumerate(self.logs):
                         if log_line.startswith("President "+from_player.name+" peeks"):
                             potential_index = index
@@ -1059,14 +1059,14 @@ class Game(object):
                                     self.record_log("💥 Discrepancy!", known_to=[self.spectator], position=index+3)
                             break
                         else:
-                            potential_index = -1
-                    if potential_index == -1:
+                            potential_index = -2
+                    if potential_index == -2:
                         return "There is no unclaimed presidency for player {}!".format(from_player.name)
                     else:
                         return "Your claim was logged."
                 if len(args) == 2:
                     # Find the first legislation where from_player was chancellor and didn’t issue a claim
-                    potential_index = -1
+                    potential_index = -2
                     for index, (log_line, known_to) in enumerate(self.logs):
                         if log_line.startswith("Chancellor "+from_player.name+" peeks"):
                             potential_index = index
@@ -1080,8 +1080,8 @@ class Game(object):
                                     self.record_log("💥 Discrepancy!", known_to=[self.spectator], position=index+1)
                             break
                         else:
-                            potential_index = -1
-                    if potential_index == -1:
+                            potential_index = -2
+                    if potential_index == -2:
                         return "There is no unclaimed chancellorship for player {}!".format(from_player.name)
                     else:
                         return "Your claim was logged."
