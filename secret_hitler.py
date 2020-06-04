@@ -1049,7 +1049,7 @@ class Game(object):
                     for index, (log_line, known_to) in enumerate(self.logs):
                         if log_line.startswith("President "+from_player.name+" peeks"):
                             potential_index = index
-                        elif (index == potential_index + 1) and ("claims" not in log_line):
+                        if ((index == potential_index + 1) and ("claims" not in log_line)) or (index == potential_index and index == len(self.logs)-1):
                             self.record_log("President {} claims {} ↦ {}".format(from_player.name, args, args[1:]), known_to=[from_player], position=index)
                             if (len(self.logs) > index + 2) and self.logs[index+2][0].startswith("Chancellor"):
                                 chancellor_claim = self.logs[index+2][0][-6:][0:2]
