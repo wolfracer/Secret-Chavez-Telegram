@@ -1045,46 +1045,44 @@ class Game(object):
                     return "Must specify claim like this: `/claim FFL` (read from left to right as: “I discarded F, my chancellor received FL.”) or `claim FL` (read as: “I received FL and discarded F”)."
                 elif len(args) == 3:
                     # Find the first legislation where from_player was president and didn’t issue a claim
-                    potential_index = -2
                     for index, (log_line, known_to) in enumerate(self.logs):
                         if log_line.startswith("President "+from_player.name+" peeks"):
-                            potential_index = index
-                        elif ((index == potential_index + 1) and ("claims" not in log_line)) or (index == 0 and index == len(self.logs)-1):
-                            self.record_log("President {} claims {} ↦ {}".format(from_player.name, args, args[1:]), known_to=[from_player], position=index)
-                            if (len(self.logs) > index + 2) and self.logs[index+2][0].startswith("Chancellor"):
-                                chancellor_claim = self.logs[index+2][0][-6:][0:2]
-                                print("[Discrepancy Check (P)] {}/{} vs {}".format("".join(sorted(args)),"".join(sorted(args[1:])), "".join(sorted(chancellor_claim))))
-                                if "".join(sorted(args[1:])) != "".join(sorted(chancellor_claim)):
-                                    print("[Discrepancy Check (P)] YES")
-                                    self.record_log("💥 Discrepancy!", known_to=[self.spectator], position=index+3)
-                            break
-                        else:
-                            potential_index = -2
-                    if potential_index == -2:
-                        return "There is no unclaimed presidency for player {}!".format(from_player.name)
-                    else:
-                        return "Your claim was logged."
+                            # If the peek is the very last message, or the next message is not already a (presidential) claim…
+                            if (index == len(self.logs)-1) or ((index < len(self.logs)-1) and ("claims" not in self.logs[index+1][0])):
+                                # …log the claim
+                                self.record_log("President {} claims {} ↦ {}".format(from_player.name, args, args[1:]), known_to=[from_player], position=index+1)
+                                # If there are at least two more messages after the newly-inserted claim, search for the chancellor’s claim
+                                if (len(self.logs) > index + 3) and self.logs[index+3][0].startswith("Chancellor"):
+                                    # Skip the presidential peek, presidential claim, chancellor peek
+                                    # Then find the tailing "XX ↦ X" part and take its first two characters
+                                    chancellor_claim = self.logs[index+3][0][-6:][0:2]
+                                    print("[Discrepancy Check (P)] {}/{} vs {}".format("".join(sorted(args)),"".join(sorted(args[1:])), "".join(sorted(chancellor_claim))))
+                                    # If the chancellor’s claim does not match what the president passed on…
+                                    if "".join(sorted(args[1:])) != "".join(sorted(chancellor_claim)):
+                                        print("[Discrepancy Check (P)] YES")
+                                        self.record_log("💥 Discrepancy!", known_to=[self.spectator], position=index+4)
+                                return "Your claim was logged."
+                    return "There is no unclaimed presidency for player {}!".format(from_player.name)
+
                 if len(args) == 2:
                     # Find the first legislation where from_player was chancellor and didn’t issue a claim
-                    potential_index = -2
                     for index, (log_line, known_to) in enumerate(self.logs):
                         if log_line.startswith("Chancellor "+from_player.name+" peeks"):
-                            potential_index = index
-                        elif (index == potential_index + 1) and ("claims" not in log_line):
-                            self.record_log("Chancellor {} claims {} ↦ {}".format(from_player.name, args, args[1:]), known_to=[from_player], position=index)
-                            if "claims" in self.logs[index-2][0]:
-                                president_claim = self.logs[index-2][0][-2:]
-                                print("[Discrepancy Check (C)] {}/{} vs {}".format("".join(sorted(president_claim)),"".join(sorted(president_claim[1:])), "".join(sorted(args))))
-                                if "".join(sorted(args)) != "".join(sorted(president_claim)):
-                                    print("[Discrepancy Check (C)] YES")
-                                    self.record_log("💥 Discrepancy!", known_to=[self.spectator], position=index+1)
-                            break
-                        else:
-                            potential_index = -2
-                    if potential_index == -2:
-                        return "There is no unclaimed chancellorship for player {}!".format(from_player.name)
-                    else:
-                        return "Your claim was logged."
+                            # If the peek is the very last message, or the next message is not already a (chancellor) claim…
+                            if (index == len(self.logs)-1) or ((index < len(self.logs)-1) and ("claims" not in self.logs[index+1][0])):
+                                # …log the claim
+                                self.record_log("Chancellor {} claims {} ↦ {}".format(from_player.name, args, args[1:]), known_to=[from_player], position=index)
+                                # If the message before the peek was a (presidential) claim…
+                                if "claims" in self.logs[index-1][0]:
+                                    # Find the tailing "XXX ↦ XX" part, and of those, the last two characters
+                                    president_claim = self.logs[index-1][0][-2:]
+                                    print("[Discrepancy Check (C)] {}/{} vs {}".format("".join(sorted(president_claim)),"".join(sorted(president_claim[1:])), "".join(sorted(args))))
+                                    # If the president’s claim does not match what the chancellor received…
+                                    if "".join(sorted(args)) != "".join(sorted(president_claim)):
+                                        print("[Discrepancy Check (C)] YES")
+                                        self.record_log("💥 Discrepancy!", known_to=[self.spectator], position=index+1)
+                                return "Your claim was logged."
+                    return "There is no unclaimed chancellorship for player {}!".format(from_player.name)
                 else:
                     return "That does not look like a valid claim."
 
