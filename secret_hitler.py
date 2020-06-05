@@ -1071,7 +1071,7 @@ class Game(object):
                             # If the peek is the very last message, or the next message is not already a (chancellor) claim…
                             if (index == len(self.logs)-1) or ((index < len(self.logs)-1) and ("claims" not in self.logs[index+1][0])):
                                 # …log the claim
-                                self.record_log("Chancellor {} claims {} ↦ {}".format(from_player.name, args, args[1:]), known_to=[from_player], position=index)
+                                self.record_log("Chancellor {} claims {} ↦ {}".format(from_player.name, args, args[1:]), known_to=[from_player], position=index+1)
                                 # If the message before the peek was a (presidential) claim…
                                 if "claims" in self.logs[index-1][0]:
                                     # Find the tailing "XXX ↦ XX" part, and of those, the last two characters
@@ -1080,7 +1080,7 @@ class Game(object):
                                     # If the president’s claim does not match what the chancellor received…
                                     if "".join(sorted(args)) != "".join(sorted(president_claim)):
                                         print("[Discrepancy Check (C)] YES")
-                                        self.record_log("💥 Discrepancy!", known_to=[self.spectator], position=index+1)
+                                        self.record_log("💥 Discrepancy!", known_to=[self.spectator], position=index+2)
                                 return "Your claim was logged."
                     return "There is no unclaimed chancellorship for player {}!".format(from_player.name)
                 else:
