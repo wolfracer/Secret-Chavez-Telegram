@@ -43,7 +43,7 @@ if not TESTING:
 
 class Player(object):
     """
-    Class for keeping track of an individual Secret Hitler player.
+    Class for keeping track of an individual Secret Chavez player.
     """
 
     def __init__(self, _id, _name):
@@ -80,7 +80,7 @@ class Player(object):
         Sets a user's role/party affiliation and notifies them about it.
         """
         self.role = _role
-        self.party = _role.replace("Hitler", "Fascist")
+        self.party = _role.replace("Chavez", "chavista")
         self.send_message("Your secret role is {}".format(self.role))
 
     def join_game(self, _game):
@@ -146,7 +146,7 @@ class Game(object):
         self.chancellor = None
         self.termlimited_players = set()
         self.dead_players = set()
-        self.confirmed_not_hitlers = set()
+        self.confirmed_not_Chavezs = set()
 
         self.spectator = Player(None, "spectators")  # dummy player used for logs access
         self.group = Player(None, "everyone")  # dummy player used for logs access
@@ -162,8 +162,8 @@ class Game(object):
         self.num_players = 0
 
         self.votes = []
-        self.liberal = 0
-        self.fascist = 0
+        self.mudista = 0
+        self.chavista = 0
         self.anarchy_progress = 0
 
         self.game_state = GameStates.ACCEPT_PLAYERS
@@ -176,33 +176,33 @@ class Game(object):
         Builds a textual representation of selected board stats,
         including:
         - Victory tracks
-            - liberal                           "liberal"
-            - fascist                           "fascist"
+            - mudista                           "mudista"
+            - chavista                           "chavista"
         - Anarchy tracker                       "anarchy"
         - Player order                          "players"
         - Draw/Discard pile information         "deck_stats"
             - detailed info on policies         "deck_stats_detailed"
-        - HitlerZone information                "hitler_warning"
+        - ChavezZone information                "Chavez_warning"
         - A blank line                          "br"
         - A separator                           "-"
         """
         if things_to_show is None:
-            things_to_show = ["liberal", "fascist", "br", "anarchy", "-", "players", "-", "deck_stats", "br",
-                              "hitler_warning"]
+            things_to_show = ["mudista", "chavista", "br", "anarchy", "-", "players", "-", "deck_stats", "br",
+                              "Chavez_warning"]
         message = ""
         to_show, rest = things_to_show[0], things_to_show[1:]
-        if to_show == "liberal":
-            message = "— Liberal Track —\n" + " ".join(
-                ["✖️", "✖️", "✖️", "✖️", "✖️"][:self.liberal] + ["◻️", "◻️", "◻️", "◻️", "🕊"][self.liberal - 5:])
-        elif to_show == "fascist":
-            fascist_track = ["◻️", "◻️", "🔮", "🗡", "🗡", "☠️"]
+        if to_show == "mudista":
+            message = "— mudista Track —\n" + " ".join(
+                ["✖️", "✖️", "✖️", "✖️", "✖️"][:self.mudista] + ["◻️", "◻️", "◻️", "◻️", "🕊"][self.mudista - 5:])
+        elif to_show == "chavista":
+            chavista_track = ["◻️", "◻️", "🔮", "🗡", "🗡", "☠️"]
             if self.num_players > 6:
-                fascist_track[2] = "👔"
-                fascist_track[1] = "🔎"
+                chavista_track[2] = "👔"
+                chavista_track[1] = "🔎"
             if self.num_players > 8:
-                fascist_track[0] = "🔎"
-            message = "— Fascist Track —\n" + " ".join(
-                ["✖️", "✖️", "✖️", "✖️", "✖️", "✖️"][:self.fascist] + fascist_track[self.fascist - 6:])
+                chavista_track[0] = "🔎"
+            message = "— chavista Track —\n" + " ".join(
+                ["✖️", "✖️", "✖️", "✖️", "✖️", "✖️"][:self.chavista] + chavista_track[self.chavista - 6:])
         elif to_show == "anarchy":
             message = "— Anarchy Track —\n" + " ".join(
                 ["✖️", "✖️", "✖️"][:self.anarchy_progress] + ["◻️", "◻️", "◻️"][:3 - self.anarchy_progress])
@@ -213,11 +213,11 @@ class Game(object):
             message = "There are {} policies left in the draw pile, {} in the discard pile.".format(len(self.deck),
                                                                                                     len(self.discard))
         elif to_show == "deck_stats_detailed":
-            message = "There are {} liberal and {} fascist policies in both piles combined.".format(6 - self.liberal,
-                                                                                                    11 - self.fascist)
-        elif to_show == "hitler_warning":
-            if self.fascist >= 3:
-                message += "‼️ Beware: If Hitler gets elected as Chancellor, the fascists win the game! ‼️"
+            message = "There are {} mudista and {} chavista policies in both piles combined.".format(6 - self.mudista,
+                                                                                                    11 - self.chavista)
+        elif to_show == "Chavez_warning":
+            if self.chavista >= 3:
+                message += "‼️ Beware: If Chavez gets elected as Chancellor, the chavistas win the game! ‼️"
         elif to_show == "br":
             message += "\n"
         elif to_show == "-":
@@ -232,7 +232,7 @@ class Game(object):
         """
         Starts a game:
         - assign all players roles
-        - send fascists night-phase information
+        - send chavistas night-phase information
         - begin presidential rotation with the first presidnet nominating their chancellor
         """
 
@@ -245,47 +245,47 @@ class Game(object):
         self.reset_blame_ratelimit()
 
         if TESTING:
-            roles = ["Liberal", "Fascist", "Liberal", "Hitler", "Liberal", "Liberal", "Fascist", "Liberal", "Fascist",
-                     "Liberal"]
+            roles = ["mudista", "chavista", "mudista", "Chavez", "mudista", "mudista", "chavista", "mudista", "chavista",
+                     "mudista"]
             for i in range(len(self.players)):
                 self.players[i].set_role(roles[i])
-                # NOTE: testing configuration does not "notify" fascists of night-phase info (if this breaks, it'll be apparent pretty quickly)
+                # NOTE: testing configuration does not "notify" chavistas of night-phase info (if this breaks, it'll be apparent pretty quickly)
         else:
             if self.num_players == 5 or self.num_players == 6:  # 1F + H
-                fascists = random.sample(self.players, 2)
+                chavistas = random.sample(self.players, 2)
             elif self.num_players == 7 or self.num_players == 8:  # 2F + H
-                fascists = random.sample(self.players, 3)
+                chavistas = random.sample(self.players, 3)
             elif self.num_players == 9 or self.num_players == 10:  # 3F + H
-                fascists = random.sample(self.players, 4)
+                chavistas = random.sample(self.players, 4)
             else:
                 raise Exception("Invalid number of players")
 
             for p in self.players:
-                if p == fascists[0]:
-                    p.set_role("Hitler")
+                if p == chavistas[0]:
+                    p.set_role("Chavez")
                     if self.num_players <= 6:
-                        p.send_message("Fascist: {}".format(fascists[1]))
-                elif p in fascists:
-                    p.set_role("Fascist")
+                        p.send_message("chavista: {}".format(chavistas[1]))
+                elif p in chavistas:
+                    p.set_role("chavista")
                     if self.num_players <= 6:
-                        p.send_message("Hitler: {}".format(fascists[0]))
+                        p.send_message("Chavez: {}".format(chavistas[0]))
                     else:
-                        p.send_message("Other Fascist{}: {}\nHitler: {}".format("s" if len(fascists) > 3 else "",
+                        p.send_message("Other chavista{}: {}\nChavez: {}".format("s" if len(chavistas) > 3 else "",
                                                                                 ", ".join(
                                                                                     [other_p.name for other_p in
-                                                                                     fascists[1:] if other_p != p]),
-                                                                                fascists[0]))
+                                                                                     chavistas[1:] if other_p != p]),
+                                                                                chavistas[0]))
                 else:
-                    p.set_role("Liberal")
+                    p.set_role("mudista")
 
         self.record_log("ROLES:", known_to=self.players)
         for player in self.players:
-            if player.role == "Liberal":
-                self.record_log("{} is {}".format(player, player.role), known_to=[p for p in self.players if p == player or p.role == "Fascist" or (p.role == "Hitler" and len(self.players) <= 6)])
-            elif player.role == "Fascist":
-                self.record_log("{} is {}".format(player, player.role), known_to=[p for p in self.players if p.role == "Fascist" or (p.role == "Hitler" and len(self.players) <= 6)])
+            if player.role == "mudista":
+                self.record_log("{} is {}".format(player, player.role), known_to=[p for p in self.players if p == player or p.role == "chavista" or (p.role == "Chavez" and len(self.players) <= 6)])
+            elif player.role == "chavista":
+                self.record_log("{} is {}".format(player, player.role), known_to=[p for p in self.players if p.role == "chavista" or (p.role == "Chavez" and len(self.players) <= 6)])
             else:
-                self.record_log("{} is {}".format(player, player.role), known_to=[p for p in self.players if p.party == "Fascist"])
+                self.record_log("{} is {}".format(player, player.role), known_to=[p for p in self.players if p.party == "chavista"])
 
         self.president = self.players[0]
         self.set_game_state(GameStates.CHANCY_NOMINATION)
@@ -391,9 +391,9 @@ class Game(object):
         Returns "F", "L", or None (if the policy could not be determined)
         """
         vote_str = vote_str.lower()
-        if vote_str in ("f", "fascist", "r", "red") or vote_str.replace(" ", "").find("spicy") != -1:
+        if vote_str in ("f", "chavista", "r", "red") or vote_str.replace(" ", "").find("spicy") != -1:
             return "F"
-        elif vote_str in ("l", "liberal", "b", "blue") or vote_str.replace(" ", "").find("nice") != -1:
+        elif vote_str in ("l", "mudista", "b", "blue") or vote_str.replace(" ", "").find("nice") != -1:
             return "L"
         else:
             return None
@@ -417,7 +417,7 @@ class Game(object):
         return an appropriate error message about why the name is not valid.
         """
         name = strip_non_printable(name)  # Fix for #14
-        for forbidden_name in ("hitler", "me too thanks"):
+        for forbidden_name in ("Chavez", "me too thanks"):
             if name.lower() == forbidden_name:
                 return "Error: {} is not a valid name because it is too similar to {}".format(name, forbidden_name)
 
@@ -445,7 +445,7 @@ class Game(object):
         (C) indicates a chancellor/chancellor candidate
         (TL) indicates a term-limited player
         (RIP) indicates a dead player
-        (CNH) indicates a player that has been proven not to be Hitler
+        (CNH) indicates a player that has been proven not to be Chavez
         """
         ret = ""
         for i in range(len(self.players)):
@@ -458,7 +458,7 @@ class Game(object):
                 status += " (TL)"
             if self.players[i] in self.dead_players:
                 status += " (RIP)"
-            if self.players[i] in self.confirmed_not_hitlers:
+            if self.players[i] in self.confirmed_not_Chavezs:
                 status += " (CNH)"
             ret += "({}) {}{}\n".format(i + 1, self.players[i], status)
 
@@ -586,7 +586,7 @@ class Game(object):
          - broadcast voting record
          - determine and announce result
          - if election passed:
-           - check if Hitler was elected chancellor with >=3F and end game if so
+           - check if Chavez was elected chancellor with >=3F and end game if so
            - update term-limits
            - reset Election Tracker
            - begin Legislative Session
@@ -605,11 +605,11 @@ class Game(object):
             self.record_log("Against: {}".format(", ".join([player.name for player, vote in zip(self.players, self.votes) if vote == False])), known_to=self.players)
 
         if election_result:
-            if self.fascist >= 3:
-                if self.chancellor.role == "Hitler":
-                    self.end_game("Fascist", "Hitler was elected chancellor")
+            if self.chavista >= 3:
+                if self.chancellor.role == "Chavez":
+                    self.end_game("chavista", "Chavez was elected chancellor")
                 else:
-                    self.confirmed_not_hitlers.add(self.chancellor)
+                    self.confirmed_not_Chavezs.add(self.chancellor)
 
             self.set_game_state(GameStates.LEG_PRES)
 
@@ -654,7 +654,7 @@ class Game(object):
             self.deck.remove(enact)
             self.discard.append(self.deck.pop(0))
 
-            if self.fascist == 5:
+            if self.chavista == 5:
                 self.vetoable_polcy = enact
                 self.set_game_state(GameStates.VETO_CHOICE)
             else:
@@ -719,12 +719,12 @@ class Game(object):
         if we don't need to wait for a decision related to executive power (according to the game_state),
         advances the presidency
         """
-        self.record_log("{} Enacted: {}".format("💠" if policy == "L" else "💢", "Liberal" if policy == "L" else "Fascist"), known_to=self.players)
+        self.record_log("{} Enacted: {}".format("💠" if policy == "L" else "💢", "mudista" if policy == "L" else "chavista"), known_to=self.players)
 
         if policy == "L":
-            self.pass_liberal()
+            self.pass_mudista()
         else:
-            self.pass_fascist(on_anarchy)
+            self.pass_chavista(on_anarchy)
 
         self.check_reshuffle()
         if not on_anarchy and self.game_state == GameStates.LEG_CHANCY:  # don't need to wait for other decisison
@@ -732,38 +732,38 @@ class Game(object):
 
         self.global_message(self.show())
 
-    def pass_liberal(self):
+    def pass_mudista(self):
         """
-        Pass a liberal policy, announce this fact, and check if this creates a liberal victory
+        Pass a mudista policy, announce this fact, and check if this creates a mudista victory
         """
-        self.liberal += 1
-        self.global_message("A liberal policy was passed!")
+        self.mudista += 1
+        self.global_message("A mudista policy was passed!")
 
-        if self.liberal == 5:
-            self.end_game("Liberal", "5 Liberal policies were enacted")
+        if self.mudista == 5:
+            self.end_game("mudista", "5 mudista policies were enacted")
 
-    def pass_fascist(self, on_anarchy):
+    def pass_chavista(self, on_anarchy):
         """
-        Pass a fascist policy, announce this fact, check if this creates a fascist victory
+        Pass a chavista policy, announce this fact, check if this creates a chavista victory
         If not on anarcy, initiates appropriate executive powers depending on policy number and player count
         """
-        self.fascist += 1
-        if self.fascist == 3:
-            self.global_message("A fascist policy was passed! Welcome to the HitlerZone™!")
+        self.chavista += 1
+        if self.chavista == 3:
+            self.global_message("A chavista policy was passed! Welcome to the ChavezZone™!")
         else:
-            self.global_message("A fascist policy was passed!")
+            self.global_message("A chavista policy was passed!")
 
-        if self.fascist == 6:
-            self.end_game("Fascist", "6 Fascist policies were enacted")
+        if self.chavista == 6:
+            self.end_game("chavista", "6 chavista policies were enacted")
 
         if on_anarchy:
             return  # any executive powers ignored in anarchy
 
-        if self.fascist == 1 and self.num_players in (9, 10):
+        if self.chavista == 1 and self.num_players in (9, 10):
             self.set_game_state(GameStates.INVESTIGATION)
-        elif self.fascist == 2 and self.num_players in (7, 8, 9, 10):
+        elif self.chavista == 2 and self.num_players in (7, 8, 9, 10):
             self.set_game_state(GameStates.INVESTIGATION)
-        elif self.fascist == 3:
+        elif self.chavista == 3:
             if self.num_players in (5, 6):  # EXAMINE
                 self.check_reshuffle()
                 self.global_message("President {} is examining top 3 policies".format(self.president))
@@ -772,7 +772,7 @@ class Game(object):
                 self.deck_peek(self.president, 3, True)
             elif self.num_players in (7, 8, 9, 10):
                 self.set_game_state(GameStates.SPECIAL_ELECTION)
-        elif self.fascist == 4 or self.fascist == 5:
+        elif self.chavista == 4 or self.chavista == 5:
             self.set_game_state(GameStates.EXECUTION)
 
     def next_alive_player(self, starting_after):
@@ -845,13 +845,13 @@ class Game(object):
     def kill(self, target):
         """
         Simulate killing a player `target`.
-            If this player is Hitler, the game will end in a liberal victory
+            If this player is Chavez, the game will end in a mudista victory
             Otherwise, this player will be unable to vote, be nominated, or run for president
             for the remainder of the game.
         """
         self.record_log("🗡 {} executed {}!".format(self.president, target), known_to=self.players)
-        if target.role == "Hitler":
-            self.end_game("Liberal", "Hitler was killed")
+        if target.role == "Chavez":
+            self.end_game("mudista", "Chavez murio de cancer")
         else:
             self.dead_players.add(target)
             self.num_alive_players -= 1
@@ -879,8 +879,8 @@ class Game(object):
         and raising a GameOverException (must be caught and handled)
         """
         self.global_message("The {} team wins! ({}.)".format(winning_party, reason))
-        if winning_party in ("Liberal", "Fascist"):
-          self.record_log("{} The {} team wins!".format("🕊" if winning_party=="Liberal" else "☠",winning_party), self.players)
+        if winning_party in ("mudista", "chavista"):
+          self.record_log("{} The {} team wins!".format("🕊" if winning_party=="mudista" else "☠",winning_party), self.players)
         self.set_game_state(GameStates.GAME_OVER)
         raise GameOverException("The {} team wins! ({}.)".format(winning_party, reason))
 
@@ -955,9 +955,9 @@ class Game(object):
                 reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(candidate.name, callback_data="/nominate {}".format(candidate.name))]
                     for candidate in self.players if candidate not in self.dead_players and candidate != self.president]))
         elif self.game_state == GameStates.EXECUTION:
-            self.global_message("President {} must kill someone".format(self.president))
+            self.global_message("El Presidente {} debe inseminar el cancer artificialmente a alguien".format(self.president))
             self.president.send_message(
-                "Pick someone to kill!",
+                "Selecciona a alguien para inseminarle cancer!",
                 reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(candidate.name, callback_data="/kill {}".format(candidate.name))]
                     for candidate in self.players if candidate not in self.dead_players]))
         elif self.game_state == GameStates.GAME_OVER:
@@ -1178,7 +1178,7 @@ class Game(object):
             elif self.game_state == GameStates.SPECIAL_ELECTION:
                 return "{} needs to pick someone to special elect!".format(pres_tag)
             elif self.game_state == GameStates.EXECUTION:
-                return "{} needs to pick someone to kill!".format(pres_tag)
+                return "{} necesita escoger a alguien para inseminarle cancer!".format(pres_tag)
         elif from_player not in self.players or from_player in self.dead_players:
             return "Error: Spectators/dead players cannot use commands that modify game data"
             # further commands affect game state
@@ -1191,9 +1191,9 @@ class Game(object):
                 if args.lower().find("me too thanks") != -1:
                     target = from_player
                     target_confirmed = True
-                elif from_player.party == "Fascist" and args.lower().find("hitler") != -1:
+                elif from_player.party == "chavista" and args.lower().find("Chavez") != -1:
                     for p in self.players:
-                        if p.role == "Hitler":
+                        if p.role == "Chavez":
                             target = p
                             target_confirmed = True
                             break
@@ -1217,14 +1217,14 @@ class Game(object):
             elif command == "kill" and self.game_state == GameStates.EXECUTION:
                 if from_player == target and not target_confirmed:
                     return "You are about to kill yourself (technically allowed by the rules). Reply /kill `me too thanks` to confirm suicide."
-                elif from_player.role == "Fascist" and target.role == "Hitler" and not target_confirmed:
+                elif from_player.role == "chavista" and target.role == "Chavez" and not target_confirmed:
                     from_player.send_message(
-                        "It looks like you are trying to kill Hitler. You WILL LOSE THE GAME if you proceed. Reply /kill `hitler` to confirm.")
+                        "It looks like you are trying to kill Chavez. You WILL LOSE THE GAME if you proceed. Reply /kill `Chavez` to confirm.")
                     return
                 else:
                     self.time_logs[-1][self.game_state][from_player] = 0 + time.time()
                     self.kill(target)
-                    self.global_message("{} has killed {}.".format(from_player, target))
+                    self.global_message("{} hizo que {} muriera de cancer inseminado.".format(from_player, target))
                     target.send_message("You are now dead. RIP. Remember "
                                         + "that dead players SHOULD NOT TALK, reveal their "
                                         + "secret role, or otherwise influence the game!")
@@ -1272,7 +1272,7 @@ class Game(object):
 
                 if self.chancellor_legislate(policy):
                     return None
-                    # if self.fascist < 5: # prevents "thanks" from happening after veto notification
+                    # if self.chavista < 5: # prevents "thanks" from happening after veto notification
                     #     return "Thanks!"
                 else:
                     return "Error: Given policy not in top 2"
@@ -1374,7 +1374,7 @@ def test_game():
     game.TEST_vote()
 
     game.TEST_handle(players[6], "discard", "s p i c y b o i")
-    game.TEST_handle(players[0], "enact", "liberal")  # check other policy nomenclature
+    game.TEST_handle(players[0], "enact", "mudista")  # check other policy nomenclature
 
     game.TEST_handle(players[0], "ja")  # veto decisison
     game.TEST_handle(players[6], "nein")
@@ -1387,7 +1387,7 @@ def test_game():
 
     # veto decisison
     game.TEST_handle(players[0], "nein")
-    # Fascist victory
+    # chavista victory
     # game.handle_message(players[6], "ja") # other veto vote shouldn't matter
 
 
