@@ -1,8 +1,8 @@
 # Secret Hitler: Telegram
 
-**A Telegram bot that allows users to play [Secret Hitler](https://www.secrethitler.com/).**
+**A Telegram bot that allows users to play [Secret Chavez](https://www.secrethitler.com/).**
 
-There is an instance running under `@SuperSecretHitlerBot`, but be aware that the bot state currently doesn't survive reboots and I reboot my server regularly, so you might want to host yourself.
+This is just an Adaptation of the classic game secret hitler, but themed with Venezuelan politics.
 
 ## Commands
 
